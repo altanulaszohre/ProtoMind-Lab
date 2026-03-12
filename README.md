@@ -8,7 +8,8 @@ The project explores how simple cell-like agents can sense their environment, ac
 
 ## 🎥 Demo
 
-<video src="assets/video.mp4" controls width="100%"></video>
+https://github.com/user-attachments/assets/89c642da-f179-4dad-a116-6b9ddf6874e9
+
 
 ## 🖼️ Preview
 
