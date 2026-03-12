@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ProtoMind Lab — Evolutionary Artificial Life v6</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap');
+
+:root {
+  --bg:      #f2efe9;
+  --bg2:     #e9e5de;
+  --bg3:     #dcd7ce;
+  --sur:     #faf9f7;
+  --brd:     #cac4ba;
+  --brd2:    #b0a89e;
+  --ink:     #1c1917;
+  --ink2:    #3d3530;
+  --ink3:    #6b6055;
+  --ink4:    #9c9080;
+  --orange:  #c2410c;
+  --orangeL: #fb923c;
+  --green:   #166534;
+  --greenL:  #4ade80;
+  --red:     #991b1b;
+  --redL:    #f87171;
+  --blue:    #1e3a8a;
+  --blueL:   #60a5fa;
+  --violet:  #5b21b6;
+  --violetL: #a78bfa;
+  --primis:  #0c4a6e;
+  --primisL: #7dd3fc;
+}
+
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'JetBrains Mono',monospace;
+  overflow:hidden;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* HEADER */
+#hdr {
+  height:38px; flex-shrink:0;
+  background:var(--sur);
+  border-bottom:1px solid var(--brd);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 12px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+.brand { display:flex; align-items:center; gap:8px; }
+#bdot { width:7px;height:7px;border-radius:50%;background:var(--orange);box-shadow:0 0 7px var(--orangeL);animation:blink 2s ease-in-out infinite; }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.brand h1 { font-family:'Outfit',sans-serif;font-weight:800;font-size:14px;letter-spacing:.07em;color:var(--ink); }
+.brand small { font-size:7px;color:var(--ink4);letter-spacing:.2em;text-transform:uppercase; }
+
+.pills { display:flex;gap:4px;align-items:center; }
+.pill {
+  display:flex;align-items:baseline;gap:2px;
+  padding:2px 8px;border-radius:20px;border:1px solid;
+  font-size:7.5px;
+}
+.pill b { font-family:'Outfit',sans-serif;font-weight:700;font-size:10px; }
+
+.ctrls { display:flex;gap:3px;align-items:center; }
+.btn {
+  padding:2px 9px;font-size:8px;cursor:pointer;
+  background:transparent;border:1px solid var(--brd);
+  color:var(--ink3);border-radius:4px;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.05em;
+  transition:all .1s;
+}
+.btn:hover { border-color:var(--orange);color:var(--orange); }
+.btn.on { background:var(--orange);color:#fff;border-color:var(--orange); }
+select.btn { appearance:none; }
+
+/* BODY */
+#body { flex:1;display:flex;overflow:hidden;min-height:0; }
+
+/* WORLD */
+#wc { flex-shrink:0;position:relative;border-right:1px solid var(--brd); }
+#world { display:block;cursor:crosshair; }
+#wlbl { position:absolute;top:7px;left:9px;font-size:7px;letter-spacing:.18em;color:var(--ink4);pointer-events:none; }
+#wbr { position:absolute;bottom:6px;right:7px;display:flex;gap:8px;font-size:7.5px;pointer-events:none; }
+
+/* PANELS */
+#panels {
+  flex:1;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr 1fr;
+  min-width:0;overflow:hidden;
+}
+.pnl { display:flex;flex-direction:column;overflow:hidden;background:var(--sur);border-left:1px solid var(--brd);border-bottom:1px solid var(--brd); }
+.pnl:nth-child(even) { }
+.pnl:nth-child(3),.pnl:nth-child(4) { border-bottom:none; }
+
+.ph {
+  height:24px;flex-shrink:0;
+  background:var(--bg2);border-bottom:1px solid var(--brd);
+  display:flex;align-items:center;padding:0 9px;gap:5px;
+}
+.ph .pd { width:5px;height:5px;border-radius:50%;flex-shrink:0; }
+.ph .pt { font-size:7.5px;letter-spacing:.12em;font-weight:600;text-transform:uppercase;color:var(--ink2); }
+.pb { flex:1;overflow:hidden;padding:6px 8px;display:flex;flex-direction:column;gap:3px;min-height:0; }
+.pb.scroll { overflow-y:auto; }
+.pb.scroll::-webkit-scrollbar{width:3px}
+.pb.scroll::-webkit-scrollbar-thumb{background:var(--brd);border-radius:2px}
+
+/* UI ATOMS */
+.row { display:flex;justify-content:space-between;align-items:center; }
+.k { font-size:7.5px;color:var(--ink4); }
+.v { font-size:8.5px;font-weight:600;color:var(--ink); }
+.sep { height:1px;background:var(--brd);flex-shrink:0;margin:2px 0; }
+
+.g2 { display:grid;grid-template-columns:1fr 1fr;gap:2px 6px; }
+.kv { display:flex;flex-direction:column; }
+.kv .k { font-size:7px;color:var(--ink4);letter-spacing:.05em;margin-bottom:1px; }
+.kv .v { font-size:8.5px;font-weight:600; }
+
+.bg { display:grid;grid-template-columns:54px 1fr 24px;align-items:center;gap:3px;margin-bottom:2px; }
+.bg .bl { font-size:7px;color:var(--ink4);text-align:right; }
+.trk { height:3.5px;background:var(--bg3);border-radius:2px;overflow:hidden; }
+.fill { height:100%;border-radius:2px;transition:width .08s; }
+.bv { font-size:7px;color:var(--ink3); }
+
+.e-num { font-family:'Outfit',sans-serif;font-weight:800;font-size:22px;line-height:1; }
+.e-num small { font-size:10px;font-weight:400;color:var(--ink4); }
+.etrk { height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:3px 0 2px; }
+.esegs { display:flex;gap:2px; }
+.eseg { flex:1;height:3px;border-radius:1px; }
+
+.clist { display:flex;flex-direction:column;gap:1px;overflow-y:auto;flex:1;min-height:0; }
+.clist::-webkit-scrollbar{width:2px}
+.clist::-webkit-scrollbar-thumb{background:var(--brd)}
+.crow {
+  display:flex;align-items:center;gap:4px;
+  padding:2px 4px;border-radius:3px;cursor:pointer;
+  transition:background .07s;font-size:7.5px;
+}
+.crow:hover { background:var(--bg2); }
+.crow.sel { background:var(--bg3); }
+.swatch { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+
+/* BOTTOM */
+#bot {
+  height:28px;flex-shrink:0;
+  background:var(--sur);border-top:1px solid var(--brd);
+  display:flex;align-items:center;overflow:hidden;
+}
+#blive { width:5px;height:5px;border-radius:50%;background:var(--green);margin:0 8px;animation:blink 1.5s ease-in-out infinite;flex-shrink:0; }
+#btag { font-size:7px;letter-spacing:.14em;color:var(--ink4);padding:0 8px;border-right:1px solid var(--brd);height:100%;display:flex;align-items:center;flex-shrink:0; }
+#evts { flex:1;display:flex;align-items:center;overflow:hidden; }
+.ev { flex-shrink:0;padding:0 9px;border-right:1px solid var(--brd);height:100%;display:flex;align-items:center;gap:5px; }
+.et { font-size:7px;color:var(--ink4); }
+.em { font-size:8px;white-space:nowrap; }
+#bhz { padding:0 10px;border-left:1px solid var(--brd);font-size:7.5px;color:var(--ink3);flex-shrink:0; }
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div class="brand">
+    <div id="bdot"></div>
+    <h1>ProtoMind Lab <small>synthetic life observatory · v6</small></h1>
+  </div>
+  <div class="pills">
+    <div class="pill" style="border-color:#c2410c44;color:var(--orange)"><span>GEN</span><b id="hg">1</b></div>
+    <div class="pill" style="border-color:#16653444;color:var(--green)"><span>ALIVE</span><b id="ha">0</b></div>
+    <div class="pill" style="border-color:#1e3a8a44;color:var(--blue)"><span>TICK</span><b id="ht">000000</b></div>
+    <div class="pill" style="border-color:#99191b44;color:var(--red)"><span>DEAD</span><b id="hd">0</b></div>
+    <div class="pill" style="border-color:#5b21b644;color:var(--violet)"><span>FOOD</span><b id="hf">0</b></div>
+  </div>
+  <div class="ctrls">
+    <button class="btn on" id="bsen" onclick="UI.toggleSen()">SENSORS</button>
+    <button class="btn on" id="bph"  onclick="UI.togglePh()">PHEROMONES</button>
+    <select class="btn" onchange="UI.setSpd(this.value)">
+      <option value="1">1×</option><option value="2">2×</option>
+      <option value="4">4×</option><option value="8">8×</option>
+    </select>
+    <button class="btn" id="bpause" onclick="UI.togglePause()">⏸ PAUSE</button>
+    <button class="btn" onclick="UI.cycleEnv()" id="benv">ENV · ABUNDANCE</button>
+    <button class="btn" onclick="UI.reset()">⟳ RESET</button>
+    <button class="btn" style="color:var(--green);border-color:#16653440" onclick="State.save()">💾 SAVE</button>
+    <button class="btn" style="color:var(--blue);border-color:#1e3a8a40" onclick="State.load(true)">↺ LOAD</button>
+  </div>
+</div>
+
+<div id="body">
+  <div id="wc">
+    <canvas id="world"></canvas>
+    <div id="wlbl">◈ PROTOMIND WORLD</div>
+    <div id="wbr">
+      <span style="color:var(--green)">⬡ food</span>
+      <span style="color:var(--red)">✦ danger</span>
+      <span style="color:#7c3aed">◉ neutral</span>
+      <span id="wbr-ph" style="color:var(--blue)">~ pher</span>
+    </div>
+  </div>
+
+  <div id="panels">
+    <!-- P1: Cell status -->
+    <div class="pnl">
+      <div class="ph"><div class="pd" style="background:var(--orange)"></div><span class="pt" id="p1t">Cell · none</span></div>
+      <div class="pb" id="p1"></div>
+    </div>
+    <!-- P2: Sensors + Motor -->
+    <div class="pnl">
+      <div class="ph"><div class="pd" style="background:var(--blue)"></div><span class="pt">Sensor · Motor</span></div>
+      <div class="pb" id="p2" style="overflow-y:auto"></div>
+    </div>
+    <!-- P3: Neural net -->
+    <div class="pnl">
+      <div class="ph"><div class="pd" style="background:var(--violet)"></div><span class="pt">Neural Network · Genome</span></div>
+      <div class="pb" id="p3" style="padding:5px 6px;gap:3px"></div>
+    </div>
+    <!-- P4: World + Evolution -->
+    <div class="pnl">
+      <div class="ph"><div class="pd" style="background:var(--green)"></div><span class="pt">World · Evolution</span></div>
+      <div class="pb scroll" id="p4"></div>
+    </div>
+  </div>
+</div>
+
+<div id="bot">
+  <div id="blive"></div>
+  <div id="btag">EVENT LOG</div>
+  <div id="evts"></div>
+  <div id="bhz">30 Hz</div>
+</div>
+
+<script>
+
+'use strict';
+
+// ════════════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════════════
+const CFG = {
+  WW: 920, WH: 600,
+  INIT: 20, MAX_POP: 90,
+  SR: 145,
+  MAX_E: 140,
+  START_E_MIN: 92, START_E_MAX: 118,
+  E_IDLE: 0.010, E_MOVE: 0.040,
+  FOOD_E: 38, DANGER_E: 26,
+  NF: 36, ND: 8, NN: 8,
+  PH_DECAY: 0.993,
+  REPRO_E: 92, REPRO_COST: 32,
+  MUT_W: 0.20, MUT_B: 0.12,
+  PROB_ADD_C: 0.07,
+  PROB_ADD_N: 0.045,
+  PROB_REM_C: 0.025,
+  PROB_CHG_A: 0.04,
+  MAX_NEURONS: 24,
+  SAVE_EVERY: 400,
+  LR: 0.0065,
+  LR_DECAY: 0.00010,
+  HOMEOSTASIS: 0.00045,
+  ELIG_DECAY: 0.93,
+  MIN_POP: 16,
+  ELITE_POOL: 12,
+  REPRO_MIN_AGE: 180,
+  BASE_REPRO_THRESH: 0.66,
+  COMPLEXITY_COST: 0.00115,
+  FITNESS_DECAY: 0.0006,
+  TRAIT_MUT: 0.06,
+};
+
+const ENV_MODES = {
+  abundance: { label:'ABUNDANCE', targetFood:42, targetDanger:6, foodSpawn:0.080, dangerSpawn:0.006, reproBonus:0.04, metabolismMul:0.92 },
+  scarcity:  { label:'SCARCITY',  targetFood:20, targetDanger:8, foodSpawn:0.030, dangerSpawn:0.008, reproBonus:-0.03, metabolismMul:1.06 },
+  hazard:    { label:'HAZARD',    targetFood:28, targetDanger:14, foodSpawn:0.045, dangerSpawn:0.014, reproBonus:-0.02, metabolismMul:1.10 },
+};
+
+// ════════════════════════════════════════════════════════
+// NEAT-STYLE EVOLVABLE GENOME
+// ════════════════════════════════════════════════════════
+let _innov = 0;
+const _innovCache = new Map();
+function innovation(a, b) {
+  const k = a + ':' + b;
+  if (!_innovCache.has(k)) _innovCache.set(k, _innov++);
+  return _innovCache.get(k);
+}
+
+const ACTS = ['tanh', 'relu', 'sigmoid', 'linear'];
+
+class NodeGene {
+  constructor(id, type, act) {
+    this.id   = id;
+    this.type = type; // 'input' | 'hidden' | 'output'
+    this.act  = act || (type === 'input' ? 'linear' : type === 'output' ? 'sigmoid' : 'tanh');
+    this.bias = (Math.random() - 0.5) * 0.4;
+  }
+  clone() {
+    const n = new NodeGene(this.id, this.type, this.act);
+    n.bias = this.bias;
+    return n;
+  }
+}
+
+class ConnGene {
+  constructor(from, to, w, en) {
+    this.from = from;
+    this.to   = to;
+    this.w    = (w !== undefined) ? w : (Math.random() - 0.5) * 2;
+    this.en   = (en !== undefined) ? en : true;
+    this.inn  = innovation(from, to);
+  }
+  clone() {
+    const c = new ConnGene(this.from, this.to, this.w, this.en);
+    c.inn = this.inn;
+    return c;
+  }
+}
+
+class Genome {
+  constructor() {
+    this.nodes = [];
+    this.conns = [];
+    this._map  = new Map();
+    this._nid  = 0;
+  }
+
+  addNode(type, act) {
+    const n = new NodeGene(this._nid++, type, act);
+    this.nodes.push(n);
+    this._map.set(n.id, n);
+    return n;
+  }
+
+  addConn(from, to, w) {
+    const ex = this.conns.find(c => c.from === from && c.to === to);
+    if (ex) { ex.en = true; return ex; }
+    const c = new ConnGene(from, to, w);
+    this.conns.push(c);
+    return c;
+  }
+
+  // Build minimal genome: 14 inputs, 6 outputs, sparse connections
+  static minimal() {
+    const g = new Genome();
+    for (let i = 0; i < 14; i++) g.addNode('input', 'linear');
+    for (let i = 0; i < 6;  i++) g.addNode('output', 'sigmoid');
+    const ins  = g.nodes.filter(n => n.type === 'input');
+    const outs = g.nodes.filter(n => n.type === 'output');
+    // sparse random init — organism must discover useful connections
+    for (const i of ins)
+      for (const o of outs)
+        if (Math.random() < 0.25)
+          g.addConn(i.id, o.id, (Math.random() - 0.5) * 0.6);
+    return g;
+  }
+
+  mutate() {
+    // 1. Perturb weights
+    for (const c of this.conns) {
+      if (Math.random() < 0.8) {
+        if (Math.random() < 0.9)
+          c.w = Math.max(-3, Math.min(3, c.w + (Math.random() - 0.5) * CFG.MUT_W));
+        else
+          c.w = (Math.random() - 0.5) * 2;
+      }
+    }
+    // 2. Perturb biases
+    for (const n of this.nodes)
+      if (Math.random() < 0.25)
+        n.bias = Math.max(-1.5, Math.min(1.5, n.bias + (Math.random() - 0.5) * CFG.MUT_B));
+
+    // 3. Add connection
+    if (Math.random() < CFG.PROB_ADD_C) {
+      const froms = this.nodes.filter(n => n.type !== 'output');
+      const tos   = this.nodes.filter(n => n.type !== 'input');
+      if (froms.length && tos.length) {
+        const f = froms[Math.floor(Math.random() * froms.length)];
+        const t = tos[Math.floor(Math.random() * tos.length)];
+        if (f.id !== t.id) this.addConn(f.id, t.id);
+      }
+    }
+
+    // 4. Add neuron (split existing connection)
+    const activeCons = this.conns.filter(c => c.en);
+    if (Math.random() < CFG.PROB_ADD_N && activeCons.length && this.nodes.length < CFG.MAX_NEURONS) {
+      const c = activeCons[Math.floor(Math.random() * activeCons.length)];
+      c.en = false;
+      const act = ACTS[Math.floor(Math.random() * ACTS.length)];
+      const nn  = this.addNode('hidden', act);
+      this.addConn(c.from, nn.id, 1.0);
+      this.addConn(nn.id, c.to, c.w);
+    }
+
+    // 5. Disable connection
+    if (Math.random() < CFG.PROB_REM_C && this.conns.length > 2) {
+      const idx = Math.floor(Math.random() * this.conns.length);
+      this.conns[idx].en = false;
+    }
+
+    // 6. Change activation of hidden neuron
+    if (Math.random() < CFG.PROB_CHG_A) {
+      const h = this.nodes.filter(n => n.type === 'hidden');
+      if (h.length)
+        h[Math.floor(Math.random() * h.length)].act = ACTS[Math.floor(Math.random() * ACTS.length)];
+    }
+  }
+
+  _buildIncoming() {
+    const incoming = new Map();
+    for (const n of this.nodes) incoming.set(n.id, []);
+    for (const c of this.conns) if (c.en && incoming.has(c.to)) incoming.get(c.to).push(c);
+    return incoming;
+  }
+
+  // Forward pass — feed-forward first, then two light relaxation sweeps for cyclic links
+  activate(inputs) {
+    const values = new Map();
+    const ins  = this.nodes.filter(n => n.type === 'input').sort((a,b)=>a.id-b.id);
+    const hid  = this.nodes.filter(n => n.type === 'hidden').sort((a,b)=>a.id-b.id);
+    const outs = this.nodes.filter(n => n.type === 'output').sort((a,b)=>a.id-b.id);
+    ins.forEach((n, i) => values.set(n.id, i < inputs.length ? inputs[i] : 0));
+
+    const incoming = this._buildIncoming();
+    const ordered = [...hid, ...outs];
+
+    const evalNode = (node) => {
+      let s = node.bias;
+      for (const c of incoming.get(node.id) || []) s += (values.get(c.from) || 0) * c.w;
+      values.set(node.id, Genome._act(s, node.act));
+    };
+
+    for (const node of ordered) evalNode(node);
+    for (let sweep = 0; sweep < 2; sweep++) for (const node of ordered) evalNode(node);
+
+    this._lastValues = Object.fromEntries([...values.entries()]);
+    this._lastIncoming = incoming;
+    return outs.map(n => values.get(n.id) || 0);
+  }
+
+  static _act(x, fn) {
+    x = Math.max(-12, Math.min(12, x));
+    if (fn === 'tanh')    return Math.tanh(x);
+    if (fn === 'sigmoid') return 1 / (1 + Math.exp(-x));
+    if (fn === 'relu')    return x > 0 ? x : 0;
+    return Math.max(-2, Math.min(2, x)); // linear
+  }
+
+  clone() {
+    const g = new Genome();
+    g._nid = this._nid;
+    for (const n of this.nodes) { const c = n.clone(); g.nodes.push(c); g._map.set(c.id, c); }
+    for (const c of this.conns)   g.conns.push(c.clone());
+    return g;
+  }
+
+  get complexity() {
+    return this.nodes.filter(n => n.type === 'hidden').length * 2
+         + this.conns.filter(c => c.en).length;
+  }
+
+  serialize() {
+    return {
+      nodes: this.nodes.map(n => ({ id:n.id, type:n.type, act:n.act, bias:n.bias })),
+      conns: this.conns.map(c => ({ from:c.from, to:c.to, w:c.w, en:c.en, inn:c.inn })),
+      nid:   this._nid,
+    };
+  }
+
+  static deserialize(d) {
+    const g = new Genome();
+    g._nid = d.nid;
+    for (const n of d.nodes) {
+      const nn = new NodeGene(n.id, n.type, n.act);
+      nn.bias  = n.bias;
+      g.nodes.push(nn);
+      g._map.set(nn.id, nn);
+    }
+    for (const c of d.conns) {
+      const cc = new ConnGene(c.from, c.to, c.w, c.en);
+      cc.inn   = c.inn;
+      g.conns.push(cc);
+    }
+    return g;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// CELL (ORGANISM)
+// Inputs (14):
+//   0  food proximity     [0-1]
+//   1  food bearing cos   [0-1]  (remapped from [-1,1])
+//   2  food bearing sin   [0-1]
+//   3  danger proximity   [0-1]
+//   4  danger bearing cos [0-1]
+//   5  danger bearing sin [0-1]
+//   6  wall proximity     [0-1]
+//   7  neutral proximity  [0-1]
+//   8  pheromone total    [0-1]
+//   9  pheromone bearing  [0-1]
+//  10  hunger             [0-1]  = 1 - vitality
+//  11  fear               [0-1]  = danger_prox * weakness
+//  12  other-cell prox    [0-1]
+//  13  other-cell bearing [0-1]
+//
+// Outputs (6):
+//   0  turn left
+//   1  turn right
+//   2  thrust forward
+//   3  thrust reverse
+//   4  reproduce (> 0.75 triggers)
+//   5  emit pheromone (> 0.6 triggers)
+// ════════════════════════════════════════════════════════
+let _cid = 0;
+let primisID = -1;
+
+// Map cell ID → shape index (0=circle 1=hexagon 2=triangle 3=diamond)
+function shapeFor(id) { return id % 4; }
+// Cell hue — deliberately avoids food-green (100-160) and danger-red (0-20, 340-360)
+function hueFor(id, gen) {
+  let h = (id * 61 + gen * 97 + 181) % 360;
+  if (h >= 90  && h <= 165) h = (h + 80)  % 360;
+  if (h <= 22  || h >= 335) h = (h + 120) % 360;
+  return h;
+}
+
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+function makeTraits(base) {
+  if (base) return {
+    metabolism: clamp(base.metabolism, 0.75, 1.35),
+    speed: clamp(base.speed, 0.80, 1.30),
+    plasticity: clamp(base.plasticity, 0.70, 1.40),
+  };
+  return {
+    metabolism: 0.92 + Math.random() * 0.18,
+    speed: 0.90 + Math.random() * 0.20,
+    plasticity: 0.88 + Math.random() * 0.24,
+  };
+}
+
+function mutateTraits(traits) {
+  return {
+    metabolism: clamp(traits.metabolism + (Math.random()-0.5) * CFG.TRAIT_MUT, 0.75, 1.35),
+    speed: clamp(traits.speed + (Math.random()-0.5) * CFG.TRAIT_MUT, 0.80, 1.30),
+    plasticity: clamp(traits.plasticity + (Math.random()-0.5) * CFG.TRAIT_MUT, 0.70, 1.40),
+  };
+}
+
+class Cell {
+  constructor(x, y, genome, gen, parentId, isPrimis, traits) {
+    this.id       = _cid++;
+    this.x        = x;
+    this.y        = y;
+    this.vx       = 0;
+    this.vy       = 0;
+    this.heading  = Math.random() * Math.PI * 2;
+    this.energy   = CFG.START_E_MIN + Math.random() * (CFG.START_E_MAX - CFG.START_E_MIN);
+    this.alive    = true;
+    this.age      = 0;
+    this.gen      = gen      || 1;
+    this.parentId = parentId || -1;
+    this.isPrimis = isPrimis || false;
+    this.genome   = genome   || Genome.minimal();
+    this.traits   = makeTraits(traits);
+    this.r        = this.isPrimis ? 11 : 9;
+    this.shape    = shapeFor(this.id);
+    this.hue      = hueFor(this.id, this.gen);
+
+    // runtime state
+    this.sensors  = new Float32Array(14);
+    this.outputs  = new Float32Array(6);
+    this.action   = 'idle';
+    this.trail    = [];
+    this.foodEaten  = 0;
+    this.dangerHits = 0;
+    this.offspring  = 0;
+    this.eDelta   = 0;
+    this.reward   = 0;
+    this.curiosity = 0;
+    this.uncertainty = 0;
+    this.dominantMotive = 'observe';
+    this.decisionReason = 'insufficient signal';
+    this.lastActivations = {};
+    this.trace = {};
+    this.fitness = 0;
+    this.lifetimeReward = 0;
+    this.learningGain = 0;
+    this.bornTick = 0;
+    this.lastFoodTick = -9999;
+    this.lastDangerTick = -9999;
+  }
+
+  // ── Sensors ───────────────────────────────────────────
+  sense(world) {
+    const { x, y, heading, energy } = this;
+    const SR = CFG.SR;
+    const s = this.sensors;
+    s.fill(0);
+
+    // food
+    let cf = null, df = Infinity;
+    for (const f of world.food) {
+      const d = Math.hypot(f.x - x, f.y - y);
+      if (d < df) { df = d; cf = f; }
+    }
+    if (cf && df < SR) {
+      s[0] = 1 - df / SR;
+      const a = Math.atan2(cf.y - y, cf.x - x) - heading;
+      s[1] = (Math.cos(a) + 1) / 2;
+      s[2] = (Math.sin(a) + 1) / 2;
+    } else { s[0] = 0; s[1] = 0.5; s[2] = 0.5; }
+
+    // danger
+    let cd = null, dd = Infinity;
+    for (const d of world.danger) {
+      const dist = Math.hypot(d.x - x, d.y - y);
+      if (dist < dd) { dd = dist; cd = d; }
+    }
+    if (cd && dd < SR) {
+      s[3] = 1 - dd / SR;
+      const a = Math.atan2(cd.y - y, cd.x - x) - heading;
+      s[4] = (Math.cos(a) + 1) / 2;
+      s[5] = (Math.sin(a) + 1) / 2;
+    } else { s[3] = 0; s[4] = 0.5; s[5] = 0.5; }
+
+    // wall
+    const wd = Math.min(x, y, CFG.WW - x, CFG.WH - y);
+    s[6] = Math.max(0, 1 - wd / 80);
+
+    // neutral
+    let cn = null, dn = Infinity;
+    for (const n of world.neutral) {
+      const d = Math.hypot(n.x - x, n.y - y);
+      if (d < dn) { dn = d; cn = n; }
+    }
+    s[7] = (cn && dn < SR) ? (1 - dn / SR) : 0;
+
+    // pheromone
+    let pt = 0, strongestP = null, strongestPw = 0;
+    for (const p of world.phers) {
+      const d = Math.hypot(p.x - x, p.y - y);
+      if (d < 90) {
+        const w = p.str * (1 - d / 90);
+        pt += w;
+        if (w > strongestPw) { strongestPw = w; strongestP = p; }
+      }
+    }
+    s[8] = Math.min(1, pt);
+    if (strongestP) {
+      const a = Math.atan2(strongestP.y - y, strongestP.x - x) - heading;
+      s[9] = (Math.cos(a) + 1) / 2;
+    } else {
+      s[9] = 0.5;
+    }
+
+    // drives
+    const vit = energy / CFG.MAX_E;
+    s[10] = 1 - vit;                      // hunger
+    s[11] = s[3] * (1 - vit);             // fear
+    this.curiosity = Math.max(0, Math.min(1, 0.55 * (1 - s[0]) + 0.2 * s[7] + 0.15 * (1 - s[8]) + 0.1 * (1 - s[3])));
+
+    // nearest other cell
+    let nc = null, dc = Infinity;
+    for (const c of world.cells) {
+      if (c === this) continue;
+      const d = Math.hypot(c.x - x, c.y - y);
+      if (d < dc) { dc = d; nc = c; }
+    }
+    if (nc && dc < SR) {
+      s[12] = 1 - dc / SR;
+      const a = Math.atan2(nc.y - y, nc.x - x) - heading;
+      s[13] = (Math.cos(a) + 1) / 2;
+    } else { s[12] = 0; s[13] = 0.5; }
+  }
+
+  // ── Step ──────────────────────────────────────────────
+  step(world) {
+    if (!this.alive) return;
+    const ePrev = this.energy;
+    this.learningGain *= 0.94;
+
+    this.sense(world);
+    const o = this.genome.activate(Array.from(this.sensors));
+    this.outputs[0] = o[0]; this.outputs[1] = o[1];
+    this.outputs[2] = o[2]; this.outputs[3] = o[3];
+    this.outputs[4] = o[4]; this.outputs[5] = o[5];
+    this.lastActivations = this.genome._lastValues || {};
+
+    const tL = o[0], tR = o[1], fF = o[2], fR = o[3], repro = o[4], pher = o[5];
+    const sortedOutputs = [...o].sort((a,b)=>b-a);
+    this.uncertainty = Math.max(0, Math.min(1, 1 - ((sortedOutputs[0] || 0) - (sortedOutputs[1] || 0))));
+
+    // Movement
+    this.heading += (tL - tR) * 0.1;
+    this.heading  = ((this.heading % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const spd = (fF - fR) * (2.2 * this.traits.speed);
+    this.x += Math.cos(this.heading) * spd;
+    this.y += Math.sin(this.heading) * spd;
+
+    // Wall bounce
+    const r = this.r;
+    if (this.x < r)            { this.x = r;            this.heading = Math.PI - this.heading; }
+    if (this.x > CFG.WW - r)   { this.x = CFG.WW - r;   this.heading = Math.PI - this.heading; }
+    if (this.y < r)            { this.y = r;            this.heading = -this.heading; }
+    if (this.y > CFG.WH - r)   { this.y = CFG.WH - r;   this.heading = -this.heading; }
+    this.heading = ((this.heading % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+
+    const env = ENV_MODES[world.mode] || ENV_MODES.abundance;
+    const complexityCost = this.genome.complexity * CFG.COMPLEXITY_COST;
+    const baseCost = (Math.abs(spd) > 0.15 ? CFG.E_MOVE : CFG.E_IDLE);
+    this.energy -= (baseCost * this.traits.metabolism * env.metabolismMul) + complexityCost;
+    this.age++;
+
+    let ateFood = false;
+    for (let i = world.food.length - 1; i >= 0; i--) {
+      const f = world.food[i];
+      if (Math.hypot(f.x - this.x, f.y - this.y) < r + f.r) {
+        this.energy = Math.min(CFG.MAX_E, this.energy + CFG.FOOD_E);
+        this.foodEaten++;
+        this.lastFoodTick = world.tick;
+        ateFood = true;
+        world.food.splice(i, 1);
+        world.log('food', '#' + this.id + (this.isPrimis ? ' [PRIMIS]' : '') + ' absorbed nutrient', '#166534');
+        break;
+      }
+    }
+
+    let hitDanger = false;
+    for (let i = world.danger.length - 1; i >= 0; i--) {
+      const d = world.danger[i];
+      if (Math.hypot(d.x - this.x, d.y - this.y) < r + d.r) {
+        this.energy -= CFG.DANGER_E;
+        this.dangerHits++;
+        this.lastDangerTick = world.tick;
+        hitDanger = true;
+        world.danger.splice(i, 1);
+        world.log('danger', '#' + this.id + ' hit threat', '#991b1b');
+        break;
+      }
+    }
+    this.energy = Math.max(0, Math.min(CFG.MAX_E, this.energy));
+
+    if (pher > 0.6)
+      world.phers.push({ x: this.x, y: this.y, str: pher * 0.75 });
+
+    this.eDelta = this.energy - ePrev;
+    const movedTowardFood = this.sensors[0] * Math.max(0, fF);
+    const avoidedThreat   = this.sensors[3] * Math.abs(tL - tR);
+    const rushedThreat    = this.sensors[3] * Math.max(0, fF);
+    const wallPenalty     = this.sensors[6] * 0.12;
+    const homeostasisPenalty = Math.abs(this.energy - 68) / 68 * 0.05;
+    let reward = (this.eDelta / 12)
+               + (movedTowardFood * 0.16)
+               + (avoidedThreat * 0.10)
+               - (rushedThreat * 0.18)
+               - wallPenalty
+               - homeostasisPenalty
+               - complexityCost * 5;
+    if (ateFood) reward += 0.9;
+    if (hitDanger) reward -= 1.0;
+    this.reward = Math.max(-1.5, Math.min(1.5, reward));
+    this.lifetimeReward += this.reward;
+    const survivalBonus = Math.min(0.09, this.age * 0.00012);
+    const learningBonus = Math.min(0.08, this.learningGain * 0.015);
+    this.fitness += 0.01 + survivalBonus + learningBonus + this.reward * 0.18 + (this.energy / CFG.MAX_E) * 0.002;
+    this.fitness -= this.genome.complexity * CFG.FITNESS_DECAY * 0.05;
+    this.fitness = Math.max(0, this.fitness);
+
+    this._hebbian();
+    this._inferMotivation();
+
+    const envRepro = (ENV_MODES[world.mode] || ENV_MODES.abundance).reproBonus;
+    const reproThreshold = CFG.BASE_REPRO_THRESH + envRepro - Math.min(0.16, this.fitness * 0.0028);
+    const reproScore = (this.age / 240) + this.foodEaten * 0.22 + this.learningGain * 0.35 + this.fitness * 0.02;
+    if (repro > reproThreshold && reproScore > 1.25 && this.energy >= CFG.REPRO_E && this.age >= CFG.REPRO_MIN_AGE && world.cells.length < CFG.MAX_POP)
+      this._reproduce(world);
+
+    const am = Math.abs(fF - fR), at = Math.abs(tL - tR);
+    if      (am > 0.25 && fF > fR) this.action = 'moving';
+    else if (am > 0.25)             this.action = 'reversing';
+    else if (at > 0.15)             this.action = tL > tR ? 'turn-L' : 'turn-R';
+    else if (repro > reproThreshold) this.action = 'reproducing';
+    else if (pher  > 0.6)           this.action = 'signaling';
+    else                            this.action = 'drifting';
+
+    this.trail.push({ x: this.x, y: this.y });
+    if (this.trail.length > 55) this.trail.shift();
+
+    if (this.energy <= 0) {
+      this.alive = false;
+      world.log('death', '#' + this.id + ' (G' + this.gen + ', age ' + this.age + ') died', '#991b1b');
+      world.dead.push({ id: this.id, gen: this.gen, age: this.age, off: this.offspring, fitness: this.fitness, food: this.foodEaten, danger: this.dangerHits });
+    }
+  }
+
+  _inferMotivation() {
+    const foodDrive   = this.sensors[0] * 0.8 + this.sensors[10] * 0.7;
+    const threatDrive = this.sensors[3] * 0.95 + this.sensors[11] * 0.8 + this.sensors[6] * 0.25;
+    const exploreDrive= this.curiosity * 0.9 + this.sensors[7] * 0.2;
+    const socialDrive = this.sensors[12] * 0.55 + this.sensors[8] * 0.45;
+    const reproduceDrive = (this.energy / CFG.MAX_E) * 0.9 + this.outputs[4] * 0.5;
+    const motives = [
+      ['nutrient pursuit', foodDrive],
+      ['threat avoidance', threatDrive],
+      ['exploration', exploreDrive],
+      ['signaling / social', socialDrive],
+      ['reproduction', reproduceDrive],
+    ].sort((a,b)=>b[1]-a[1]);
+    this.dominantMotive = motives[0][0];
+
+    if (this.sensors[3] > 0.45) this.decisionReason = 'nearby threat signal dominated behaviour';
+    else if (this.sensors[0] > 0.45 && this.sensors[10] > 0.3) this.decisionReason = 'nutrient detected while hunger was elevated';
+    else if (this.outputs[4] > 0.75 && this.energy >= CFG.REPRO_E) this.decisionReason = 'high surplus energy triggered reproduction';
+    else if (this.outputs[5] > 0.6 && this.sensors[8] < 0.35) this.decisionReason = 'low external pheromone prompted signaling';
+    else if (this.uncertainty > 0.6) this.decisionReason = 'conflicting outputs increased uncertainty';
+    else this.decisionReason = this.dominantMotive + ' remained the strongest internal drive';
+  }
+
+  _reproduce(world) {
+    this.energy   -= CFG.REPRO_COST;
+    this.offspring++;
+    const cg = this.genome.clone();
+    cg.mutate();
+    const a = Math.random() * Math.PI * 2;
+    const child = new Cell(
+      this.x + Math.cos(a) * this.r * 3,
+      this.y + Math.sin(a) * this.r * 3,
+      cg, this.gen + 1, this.id, false, mutateTraits(this.traits)
+    );
+    child.energy = Math.max(44, this.energy * 0.42);
+    child.bornTick = world.tick;
+    child.fitness = Math.max(0, this.fitness * 0.08);
+    world.cells.push(child);
+    world.maxGen = Math.max(world.maxGen, child.gen);
+    world.log('birth', '#' + child.id + ' born from #' + this.id + ' (G' + child.gen + ')', '#c2410c');
+  }
+
+  // Reward-modulated plasticity with eligibility traces.
+  _hebbian() {
+    const values = this.lastActivations || {};
+    for (const c of this.genome.conns) {
+      if (!c.en) continue;
+      const pre  = values[c.from] ?? 0;
+      const post = values[c.to]   ?? 0;
+      const key = c.inn;
+      const eligPrev = this.trace[key] || 0;
+      const elig = eligPrev * CFG.ELIG_DECAY + (pre * post);
+      this.trace[key] = elig;
+      const delta = (CFG.LR * this.traits.plasticity) * ((this.reward * elig) - 0.02 * c.w);
+      c.w += delta;
+      c.w -= CFG.LR_DECAY * c.w;
+      c.w += (0 - c.w) * CFG.HOMEOSTASIS * 0.02;
+      c.w  = Math.max(-3, Math.min(3, c.w));
+      this.learningGain += Math.abs(delta);
+    }
+
+    const outs = this.genome.nodes.filter(n => n.type === 'output').sort((a,b)=>a.id-b.id);
+    outs.forEach((n, i) => {
+      const out = this.outputs[i] || 0;
+      const delta = CFG.LR * this.traits.plasticity * 0.12 * this.reward * (out - 0.5);
+      n.bias += delta;
+      n.bias = Math.max(-1.5, Math.min(1.5, n.bias));
+      this.learningGain += Math.abs(delta) * 0.5;
+    });
+  }
+
+  get colorHex() { return this.isPrimis ? '#0c4a6e' : `hsl(${this.hue},58%,34%)`; }
+  get colorLight() { return this.isPrimis ? '#7dd3fc' : `hsl(${this.hue},65%,70%)`; }
+
+  serialize() {
+    return {
+      id:this.id, x:this.x, y:this.y, heading:this.heading,
+      energy:this.energy, alive:this.alive, age:this.age,
+      gen:this.gen, parentId:this.parentId, isPrimis:this.isPrimis,
+      genome:this.genome.serialize(),
+      hue:this.hue, shape:this.shape,
+      foodEaten:this.foodEaten, dangerHits:this.dangerHits, offspring:this.offspring,
+      fitness:this.fitness, lifetimeReward:this.lifetimeReward, learningGain:this.learningGain,
+      bornTick:this.bornTick, trace:this.trace, traits:this.traits,
+    };
+  }
+  static deserialize(d) {
+    const c = new Cell(d.x, d.y, Genome.deserialize(d.genome), d.gen, d.parentId, d.isPrimis);
+    c.id = d.id; c.heading = d.heading; c.energy = d.energy; c.alive = d.alive;
+    c.age = d.age; c.hue = d.hue; c.shape = d.shape;
+    c.foodEaten = d.foodEaten || 0; c.dangerHits = d.dangerHits || 0; c.offspring = d.offspring || 0;
+    c.fitness = d.fitness || 0; c.lifetimeReward = d.lifetimeReward || 0; c.learningGain = d.learningGain || 0;
+    c.bornTick = d.bornTick || 0; c.trace = d.trace || {}; c.traits = makeTraits(d.traits);
+    return c;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// WORLD
+// ════════════════════════════════════════════════════════
+class World {
+  constructor() {
+    this.cells   = [];
+    this.food    = [];
+    this.danger  = [];
+    this.neutral = [];
+    this.phers   = [];
+    this.dead    = [];
+    this.tick    = 0;
+    this.maxGen  = 1;
+    this.events  = [];
+    this.totalBorn = 0;
+    this.eliteArchive = [];
+    this.bestFitness = 0;
+    this.bestEver = null;
+    this.mode = "abundance";
+    this.history = [];
+    this._init();
+  }
+
+  _init() {
+    // PRIMIS — the named organism, always starts in center
+    const p = new Cell(CFG.WW / 2, CFG.WH / 2, null, 1, -1, true, {metabolism:0.94, speed:1.0, plasticity:1.1});
+    primisID = p.id;
+    this.cells.push(p);
+    for (let i = 1; i < CFG.INIT; i++)
+      this.cells.push(new Cell(
+        60 + Math.random() * (CFG.WW - 120),
+        60 + Math.random() * (CFG.WH - 120)
+      ));
+    this.totalBorn = CFG.INIT;
+    for (let i = 0; i < CFG.NF; i++) this._spawnFood();
+    for (let i = 0; i < CFG.ND; i++) this._spawnDanger();
+    for (let i = 0; i < CFG.NN; i++) this._spawnNeutral();
+  }
+
+  _spawnFood() {
+    this.food.push({
+      x: 40 + Math.random() * (CFG.WW - 80),
+      y: 40 + Math.random() * (CFG.WH - 80),
+      r: 8, ph: Math.random() * Math.PI * 2
+    });
+  }
+
+  _spawnDanger() {
+    this.danger.push({
+      x: 40 + Math.random() * (CFG.WW - 80),
+      y: 40 + Math.random() * (CFG.WH - 80),
+      r: 10, ph: Math.random() * Math.PI * 2,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+    });
+  }
+
+  _spawnNeutral() {
+    const types = ['zone', 'barrier', 'current'];
+    this.neutral.push({
+      x:    60 + Math.random() * (CFG.WW - 120),
+      y:    60 + Math.random() * (CFG.WH - 120),
+      r:    20 + Math.random() * 22,
+      type: types[Math.floor(Math.random() * 3)],
+      ph:   Math.random() * Math.PI * 2,
+    });
+  }
+
+  _scoreCell(cell) {
+    return (cell.fitness || 0)
+      + cell.foodEaten * 5
+      + cell.offspring * 12
+      + cell.age * 0.015
+      - cell.dangerHits * 7
+      - cell.genome.complexity * 0.15;
+  }
+
+  _recordElite(cell) {
+    const score = this._scoreCell(cell);
+    if (!Number.isFinite(score)) return;
+    if (score > this.bestFitness) {
+      this.bestFitness = score;
+      this.bestEver = {
+        score,
+        id: cell.id,
+        gen: cell.gen,
+        genome: cell.genome.serialize(),
+        traits: cell.traits,
+        food: cell.foodEaten,
+        off: cell.offspring,
+        age: cell.age,
+      };
+    }
+    this.eliteArchive.push({
+      score,
+      gen: cell.gen,
+      parentId: cell.parentId,
+      genome: cell.genome.serialize(),
+      traits: cell.traits,
+    });
+    this.eliteArchive.sort((a,b)=>b.score-a.score);
+    this.eliteArchive = this.eliteArchive.slice(0, CFG.ELITE_POOL);
+  }
+
+  _spawnFromElite() {
+    if (!this.eliteArchive.length) return false;
+    const pool = this.eliteArchive;
+    const total = pool.reduce((s,e)=>s+Math.max(1, e.score), 0);
+    let r = Math.random() * total;
+    let pick = pool[0];
+    for (const e of pool) {
+      r -= Math.max(1, e.score);
+      if (r <= 0) { pick = e; break; }
+    }
+    const g = Genome.deserialize(pick.genome);
+    g.mutate();
+    const child = new Cell(
+      80 + Math.random() * (CFG.WW - 160),
+      80 + Math.random() * (CFG.WH - 160),
+      g, (pick.gen || 1) + 1, pick.parentId || -1, false, mutateTraits(pick.traits || makeTraits())
+    );
+    child.bornTick = this.tick;
+    child.energy = 45 + Math.random() * 15;
+    this.cells.push(child);
+    this.maxGen = Math.max(this.maxGen, child.gen);
+    this.log('elite', 'elite lineage seeded #' + child.id + ' from archive', '#5b21b6');
+    return true;
+  }
+
+  log(type, msg, color) {
+    this.events.push({ type, msg, color, tick: this.tick });
+    if (this.events.length > 60) this.events.shift();
+  }
+
+  step() {
+    this.tick++;
+
+    for (const c of this.cells) if (c.alive) c.step(this);
+
+    const fallen = this.cells.filter(c => !c.alive);
+    for (const c of fallen) this._recordElite(c);
+    for (const c of this.cells) this._recordElite(c);
+    this.cells = this.cells.filter(c => c.alive);
+
+    for (const d of this.danger) {
+      d.x += d.vx; d.y += d.vy;
+      if (d.x < 20 || d.x > CFG.WW - 20) d.vx = -d.vx;
+      if (d.y < 20 || d.y > CFG.WH - 20) d.vy = -d.vy;
+    }
+
+    for (let i = this.phers.length - 1; i >= 0; i--) {
+      this.phers[i].str *= CFG.PH_DECAY;
+      if (this.phers[i].str < 0.015) this.phers.splice(i, 1);
+    }
+
+    const env = ENV_MODES[this.mode] || ENV_MODES.abundance;
+    if (this.food.length   < env.targetFood && Math.random() < env.foodSpawn) this._spawnFood();
+    if (this.danger.length < env.targetDanger && Math.random() < env.dangerSpawn) this._spawnDanger();
+
+    if (this.tick % 2400 === 0) {
+      const modes = ['abundance','scarcity','hazard'];
+      this.mode = modes[(modes.indexOf(this.mode) + 1) % modes.length];
+      this.log('mode', 'environment shifted to ' + ENV_MODES[this.mode].label, '#1e3a8a');
+    }
+
+    if (this.tick % 120 === 0) {
+      const alive = this.cells;
+      const avgFitness = alive.length ? alive.reduce((s,c)=>s+c.fitness,0)/alive.length : 0;
+      const avgComplexity = alive.length ? alive.reduce((s,c)=>s+c.genome.complexity,0)/alive.length : 0;
+      const avgAge = alive.length ? alive.reduce((s,c)=>s+c.age,0)/alive.length : 0;
+      this.history.push({tick:this.tick, avgFitness, avgComplexity, avgAge, pop:alive.length});
+      if (this.history.length > 120) this.history.shift();
+    }
+
+    while (this.cells.length < CFG.MIN_POP) {
+      if (!this._spawnFromElite()) {
+        const child = new Cell(
+          80 + Math.random() * (CFG.WW - 160),
+          80 + Math.random() * (CFG.WH - 160)
+        );
+        child.bornTick = this.tick;
+        this.cells.push(child);
+      }
+    }
+
+    if (this.cells.length === 0) {
+      this.log('system', 'Extinction — reseeding population', '#5b21b6');
+      for (let i = 0; i < CFG.MIN_POP; i++) {
+        if (!this._spawnFromElite()) {
+          const child = new Cell(
+            80 + Math.random() * (CFG.WW - 160),
+            80 + Math.random() * (CFG.WH - 160)
+          );
+          child.bornTick = this.tick;
+          this.cells.push(child);
+        }
+      }
+    }
+
+    this.totalBorn = _cid;
+    if (this.tick % CFG.SAVE_EVERY === 0) State.save();
+  }
+
+  serialize() {
+    return {
+      cells:  this.cells.map(c => c.serialize()),
+      food:   this.food, danger: this.danger,
+      neutral:this.neutral, phers: this.phers,
+      dead:   this.dead.slice(-200),
+      tick:   this.tick, maxGen: this.maxGen,
+      totalBorn: this.totalBorn,
+      innov:  _innov,
+      cid: _cid,
+      primisID,
+      events: this.events.slice(-30),
+      eliteArchive: this.eliteArchive,
+      bestFitness: this.bestFitness,
+      bestEver: this.bestEver,
+      mode: this.mode,
+      history: this.history,
+    };
+  }
+
+  static deserialize(d) {
+    _innov = d.innov || 0;
+    _cid = d.cid || 0;
+    primisID = d.primisID ?? -1;
+    const w = Object.create(World.prototype);
+    w.cells   = (d.cells || []).map(c => Cell.deserialize(c));
+    w.food    = d.food    || [];
+    w.danger  = d.danger  || [];
+    w.neutral = d.neutral || [];
+    w.phers   = d.phers   || [];
+    w.dead    = d.dead    || [];
+    w.tick    = d.tick    || 0;
+    w.maxGen  = d.maxGen  || 1;
+    w.totalBorn = d.totalBorn || 0;
+    w.events  = d.events  || [];
+    w.eliteArchive = d.eliteArchive || [];
+    w.bestFitness = d.bestFitness || 0;
+    w.bestEver = d.bestEver || null;
+    w.mode = d.mode || "abundance";
+    w.history = d.history || [];
+    return w;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// RENDERER
+// ════════════════════════════════════════════════════════
+const cvs = document.getElementById('world');
+const ctx = cvs.getContext('2d');
+let W, selCell = null, animT = 0;
+let showSen = true, showPh = true;
+
+function initCanvas() {
+  const bodyH = window.innerHeight - 38 - 28;
+  const scale = bodyH / CFG.WH;
+  const cw = Math.floor(CFG.WW * scale);
+  cvs.width  = CFG.WW;
+  cvs.height = CFG.WH;
+  cvs.style.width  = cw + 'px';
+  cvs.style.height = bodyH + 'px';
+  document.getElementById('wc').style.width = cw + 'px';
+}
+
+// ── Shape helpers ──────────────────────────────────────
+function hexPath(x, y, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const a = i * Math.PI / 3 - Math.PI / 6;
+    i === 0 ? ctx.moveTo(x + Math.cos(a)*r, y + Math.sin(a)*r)
+            : ctx.lineTo(x + Math.cos(a)*r, y + Math.sin(a)*r);
+  }
+  ctx.closePath();
+}
+
+function starPath(x, y, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 12; i++) {
+    const a  = i * Math.PI / 6 - Math.PI / 2;
+    const ir = i % 2 === 0 ? r : r * 0.42;
+    i === 0 ? ctx.moveTo(x + Math.cos(a)*ir, y + Math.sin(a)*ir)
+            : ctx.lineTo(x + Math.cos(a)*ir, y + Math.sin(a)*ir);
+  }
+  ctx.closePath();
+}
+
+function cellPath(x, y, r, shape) {
+  if (shape === 0) {
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+  } else if (shape === 1) {
+    hexPath(x, y, r);
+  } else if (shape === 2) {
+    ctx.beginPath();
+    for (let i = 0; i < 3; i++) {
+      const a = i * Math.PI * 2 / 3 - Math.PI / 2;
+      i === 0 ? ctx.moveTo(x + Math.cos(a)*r, y + Math.sin(a)*r)
+              : ctx.lineTo(x + Math.cos(a)*r, y + Math.sin(a)*r);
+    }
+    ctx.closePath();
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(x, y - r); ctx.lineTo(x + r*0.75, y);
+    ctx.lineTo(x, y + r); ctx.lineTo(x - r*0.75, y);
+    ctx.closePath();
+  }
+}
+
+function drawWorld() {
+  ctx.fillStyle = '#edeae3';
+  ctx.fillRect(0, 0, CFG.WW, CFG.WH);
+
+  // Dot grid
+  ctx.fillStyle = 'rgba(0,0,0,.055)';
+  for (let gx = 26; gx < CFG.WW; gx += 28)
+    for (let gy = 26; gy < CFG.WH; gy += 28) {
+      ctx.beginPath(); ctx.arc(gx, gy, 0.8, 0, Math.PI*2); ctx.fill();
+    }
+
+  // Neutral zones
+  for (const n of W.neutral) {
+    const nc = n.type === 'zone' ? '#7c3aed' : n.type === 'barrier' ? '#475569' : '#0369a1';
+    ctx.save();
+    ctx.globalAlpha = 0.08;
+    ctx.fillStyle = nc;
+    ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 0.22;
+    ctx.strokeStyle = nc; ctx.lineWidth = 1.2; ctx.setLineDash([4, 6]);
+    ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+    ctx.fillStyle = nc + '88'; ctx.font = '7px JetBrains Mono'; ctx.textAlign = 'center';
+    ctx.fillText(n.type.toUpperCase(), n.x, n.y);
+  }
+
+  // Pheromones
+  if (showPh) {
+    for (const p of W.phers) {
+      ctx.save(); ctx.globalAlpha = p.str * 0.28;
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 22);
+      g.addColorStop(0, 'rgba(30,58,138,.9)'); g.addColorStop(1, 'rgba(30,58,138,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 22, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // ── Food (hexagon) ────────────────────────────────────
+  for (const f of W.food) {
+    const pulse = 0.87 + 0.13 * Math.sin(animT * 0.05 + f.ph);
+    const r = f.r * pulse;
+    ctx.save();
+    ctx.shadowColor = 'rgba(22,101,52,.35)'; ctx.shadowBlur = 9 * pulse;
+    const g = ctx.createLinearGradient(f.x - r, f.y - r, f.x + r, f.y + r);
+    g.addColorStop(0, 'rgba(134,239,172,.97)');
+    g.addColorStop(1, 'rgba(21,128,61,.88)');
+    hexPath(f.x, f.y, r);
+    ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = 'rgba(22,163,74,.65)'; ctx.lineWidth = 1.2;
+    hexPath(f.x, f.y, r); ctx.stroke();
+    ctx.beginPath(); ctx.arc(f.x - r*.28, f.y - r*.28, r*.2, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fill();
+    ctx.restore();
+  }
+
+  // ── Danger (6-pointed star) ───────────────────────────
+  for (const d of W.danger) {
+    const pulse = 0.9 + 0.1 * Math.sin(animT * 0.06 + d.ph);
+    const r = d.r * pulse;
+    ctx.save();
+    ctx.shadowColor = 'rgba(153,27,27,.4)'; ctx.shadowBlur = 11 * pulse;
+    const g = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, r);
+    g.addColorStop(0, 'rgba(254,202,202,.96)');
+    g.addColorStop(1, 'rgba(127,29,29,.9)');
+    starPath(d.x, d.y, r);
+    ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = 'rgba(220,38,38,.6)'; ctx.lineWidth = 1.1;
+    starPath(d.x, d.y, r); ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── Cells ─────────────────────────────────────────────
+  for (const c of W.cells) drawCell(c);
+
+  // Sense ring for selected cell
+  if (selCell && selCell.alive) {
+    ctx.save(); ctx.setLineDash([5, 7]);
+    ctx.strokeStyle = 'rgba(0,0,0,.12)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(selCell.x, selCell.y, CFG.SR, 0, Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
+  }
+}
+
+function drawCell(c) {
+  const { x, y, heading, energy, r, shape, isPrimis } = c;
+  const ev = energy / CFG.MAX_E;
+  const R  = r * (1 + 0.065 * Math.sin(animT * 0.06 + c.id));
+  const sel = c === selCell;
+
+  // Trail
+  if (c.trail.length > 1) {
+    for (let i = 1; i < c.trail.length; i++) {
+      const t = i / c.trail.length;
+      const h = isPrimis ? 210 : c.hue;
+      ctx.strokeStyle = `hsla(${h},52%,40%,${t * 0.15})`;
+      ctx.lineWidth = t * 1.8;
+      const p1 = c.trail[i-1], p2 = c.trail[i];
+      ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+    }
+  }
+
+  // Sensor spokes (selected only)
+  if (sel && showSen) {
+    for (let i = 0; i < 8; i++) {
+      const a = heading + i * Math.PI * 2 / 8;
+      const v = c.sensors[i] || 0;
+      ctx.strokeStyle = `rgba(12,74,110,${0.07 + v * 0.24})`;
+      ctx.lineWidth = 0.8 + v * 1.2;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + Math.cos(a) * (20 + v * 100), y + Math.sin(a) * (20 + v * 100));
+      ctx.stroke();
+    }
+  }
+
+  // Outer glow (state dependent)
+  let gh = isPrimis ? 210 : c.hue;
+  if (c.dominantMotive === 'threat avoidance') gh = 2;
+  else if (c.dominantMotive === 'nutrient pursuit') gh = 132;
+  else if (c.dominantMotive === 'exploration') gh = 215;
+  else if (c.dominantMotive === 'reproduction') gh = 24;
+  const glow = ctx.createRadialGradient(x, y, R*.5, x, y, R + 16);
+  glow.addColorStop(0, `hsla(${gh},62%,50%,${(0.14 + c.uncertainty * 0.08) * ev})`);
+  glow.addColorStop(1, `hsla(${gh},62%,50%,0)`);
+  ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, y, R+16, 0, Math.PI*2); ctx.fill();
+
+  // Cell body
+  ctx.save();
+  ctx.shadowColor = isPrimis ? 'rgba(12,74,110,.35)' : `hsla(${c.hue},55%,35%,.22)`;
+  ctx.shadowBlur = sel ? 20 : 9;
+  const grad = ctx.createRadialGradient(x - R*.22, y - R*.28, 0, x, y, R);
+  if (isPrimis) {
+    grad.addColorStop(0, `rgba(186,230,253,${0.9 + 0.08*ev})`);
+    grad.addColorStop(1, `rgba(12,74,110,${0.78 + 0.1*ev})`);
+  } else {
+    grad.addColorStop(0, `hsla(${c.hue},62%,${72+10*ev}%,.9)`);
+    grad.addColorStop(1, `hsla(${c.hue},55%,${38+10*ev}%,.8)`);
+  }
+  cellPath(x, y, R, shape);
+  ctx.fillStyle = grad; ctx.fill();
+  ctx.strokeStyle = isPrimis ? 'rgba(12,74,110,.75)' : `hsla(${c.hue},48%,28%,.5)`;
+  ctx.lineWidth = sel ? 2.5 : isPrimis ? 2 : 1.2;
+  cellPath(x, y, R, shape); ctx.stroke();
+  ctx.restore();
+
+  // Nucleus
+  ctx.beginPath(); ctx.arc(x, y, R * 0.36, 0, Math.PI*2);
+  ctx.fillStyle = isPrimis ? 'rgba(12,74,110,.5)' : `hsla(${c.hue},48%,28%,.38)`;
+  ctx.fill();
+
+  // Heading arrow
+  const hx = x + Math.cos(heading) * (R + 7);
+  const hy = y + Math.sin(heading) * (R + 7);
+  ctx.strokeStyle = isPrimis ? 'rgba(12,74,110,.85)' : `hsla(${c.hue},55%,30%,.7)`;
+  ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(hx, hy); ctx.stroke();
+
+  // Vitality arc
+  const arcCol = ev > 0.55
+    ? (isPrimis ? 'rgba(12,74,110,.6)' : `hsla(${c.hue},58%,38%,.55)`)
+    : ev > 0.25 ? 'rgba(194,65,12,.6)' : 'rgba(153,27,27,.65)';
+  ctx.strokeStyle = arcCol; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.arc(x, y, R+4, -Math.PI/2, -Math.PI/2 + ev*Math.PI*2); ctx.stroke();
+
+  // PRIMIS crown
+  if (isPrimis) {
+    ctx.font = '10px serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(12,74,110,.8)';
+    ctx.fillText('✦', x, y + R + 14);
+  }
+
+  // Gen tag
+  ctx.fillStyle = 'rgba(0,0,0,.32)'; ctx.font = '7px JetBrains Mono'; ctx.textAlign = 'center';
+  ctx.fillText('G' + c.gen, x, y + R + (isPrimis ? 18 : 13));
+
+  // Critical energy flicker
+  if (ev < 0.2) {
+    const fl = 0.5 + 0.5 * Math.sin(animT * 0.2);
+    ctx.save(); ctx.globalAlpha = fl * 0.3;
+    ctx.strokeStyle = 'rgba(153,27,27,.9)'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(x, y, R+7, 0, Math.PI*2); ctx.stroke();
+    ctx.restore();
+  }
+
+  // Selection ring
+  if (sel) {
+    ctx.save(); ctx.setLineDash([3, 4]);
+    ctx.strokeStyle = 'rgba(12,74,110,.4)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(x, y, R+10, 0, Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// PANEL RENDERS — all fit in fixed height, no inner scroll needed
+// ════════════════════════════════════════════════════════
+const SNAMES = ['Food Prox','Food cos','Food sin','Danger Prox','Danger cos','Danger sin','Wall','Neutral','Pheromone','Pher Ang','Hunger','Fear','Cell Prox','Cell Ang'];
+const SCOLS  = ['#166534','#16a34a','#16a34a','#991b1b','#dc2626','#dc2626','#1e40af','#6d28d9','#1d4ed8','#4338ca','#c2410c','#9f1239','#b45309','#d97706'];
+const ONAMES = ['Turn L','Turn R','Thrust F','Thrust R','Reproduce','Emit Pher'];
+const OCOLS  = ['#1e40af','#6d28d9','#166534','#c2410c','#9f1239','#1d4ed8'];
+
+function renderP1() {
+  const c = selCell && selCell.alive ? selCell : W.cells[0];
+  document.getElementById('p1t').textContent = c ? (c.isPrimis ? '✦ PRIMIS #' + c.id : 'Cell #' + c.id) : 'Cell · none';
+  const p = document.getElementById('p1');
+  if (!c) { p.innerHTML = '<span class="k">Click a cell to inspect</span>'; return; }
+  const ev = c.energy / CFG.MAX_E;
+  const ec = ev > 0.55 ? '#c2410c' : ev > 0.25 ? '#d97706' : '#991b1b';
+  const motiveColor = c.dominantMotive.includes('threat') ? 'var(--red)' : c.dominantMotive.includes('nutrient') ? 'var(--green)' : c.dominantMotive.includes('reproduction') ? 'var(--orange)' : 'var(--blue)';
+  p.innerHTML = `
+  <div class="g2">
+    <div class="kv"><span class="k">STATUS</span><span class="v" style="color:${c.alive?'var(--green)':'var(--red)'}">${c.alive?'ALIVE':'DEAD'}</span></div>
+    <div class="kv"><span class="k">GENERATION</span><span class="v" style="color:var(--orange)">${c.gen}</span></div>
+    <div class="kv"><span class="k">AGE (ticks)</span><span class="v">${c.age}</span></div>
+    <div class="kv"><span class="k">ACTION</span><span class="v" style="color:var(--blue);font-size:8px">${c.action}</span></div>
+    <div class="kv"><span class="k">FOOD EATEN</span><span class="v" style="color:var(--green)">${c.foodEaten}</span></div>
+    <div class="kv"><span class="k">FITNESS</span><span class="v" style="color:var(--violet)">${c.fitness.toFixed(2)}</span></div>
+    <div class="kv"><span class="k">LEARNING GAIN</span><span class="v" style="color:var(--blue)">${c.learningGain.toFixed(3)}</span></div>
+    <div class="kv"><span class="k">METAB / SPEED</span><span class="v">${c.traits.metabolism.toFixed(2)} / ${c.traits.speed.toFixed(2)}</span></div>
+    <div class="kv"><span class="k">PLASTICITY</span><span class="v">${c.traits.plasticity.toFixed(2)}</span></div>
+    <div class="kv"><span class="k">DANGER HITS</span><span class="v" style="color:var(--red)">${c.dangerHits}</span></div>
+    <div class="kv"><span class="k">OFFSPRING</span><span class="v" style="color:var(--orange)">${c.offspring}</span></div>
+    <div class="kv"><span class="k">REWARD δ</span><span class="v" style="color:${c.reward>=0?'var(--green)':'var(--red)'}">${c.reward>0?'+':''}${(c.reward||0).toFixed(3)}</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="e-num" style="color:${ec}">${c.energy.toFixed(1)}<small>/100</small></div>
+  <div class="etrk"><div class="fill" style="width:${c.energy}%;background:${ec}"></div></div>
+  <div class="esegs">${Array.from({length:10},(_,i)=>`<div class="eseg" style="background:${i<Math.floor(c.energy/10)?ec:'var(--bg3)'}"></div>`).join('')}</div>
+  <div class="sep"></div>
+  <div style="font-size:7.5px;color:var(--ink4);letter-spacing:.1em;margin-bottom:2px">INTERNAL DRIVES</div>
+  <div class="bg"><span class="bl">Hunger</span><div class="trk"><div class="fill" style="width:${(c.sensors[10]||0)*100}%;background:var(--orange)"></div></div><span class="bv">${(c.sensors[10]||0).toFixed(2)}</span></div>
+  <div class="bg"><span class="bl">Fear</span><div class="trk"><div class="fill" style="width:${(c.sensors[11]||0)*100}%;background:var(--red)"></div></div><span class="bv">${(c.sensors[11]||0).toFixed(2)}</span></div>
+  <div class="bg"><span class="bl">Curiosity</span><div class="trk"><div class="fill" style="width:${(c.curiosity||0)*100}%;background:var(--blue)"></div></div><span class="bv">${(c.curiosity||0).toFixed(2)}</span></div>
+  <div class="bg"><span class="bl">Uncertainty</span><div class="trk"><div class="fill" style="width:${(c.uncertainty||0)*100}%;background:var(--violet)"></div></div><span class="bv">${(c.uncertainty||0).toFixed(2)}</span></div>
+  <div class="sep"></div>
+  <div class="bg"><span class="bl">Learning</span><div class="trk"><div class="fill" style="width:${Math.min(1,(c.learningGain||0)/0.25)*100}%;background:var(--violet)"></div></div><span class="bv">${(c.learningGain||0).toFixed(3)}</span></div>
+  <div class="kv"><span class="k">DOMINANT MOTIVE</span><span class="v" style="color:${motiveColor};font-size:8px">${c.dominantMotive}</span></div>
+  <div class="kv" style="margin-top:2px"><span class="k">REASON</span><span class="v" style="font-size:7.5px;line-height:1.3;color:var(--ink2)">${c.decisionReason}</span></div>
+  <div class="sep"></div>
+  <div class="g2">
+    <div class="kv"><span class="k">NEURONS</span><span class="v" style="color:var(--violet)">${c.genome.nodes.length}</span></div>
+    <div class="kv"><span class="k">HIDDEN</span><span class="v" style="color:var(--violetL);font-size:8.5px">${c.genome.nodes.filter(n=>n.type==='hidden').length}</span></div>
+    <div class="kv"><span class="k">CONNECTIONS</span><span class="v" style="color:var(--violet)">${c.genome.conns.filter(c=>c.en).length}</span></div>
+    <div class="kv"><span class="k">COMPLEXITY</span><span class="v" style="color:var(--orange)">${c.genome.complexity}</span></div>
+  </div>
+  <div class="sep"></div>
+  <div style="font-size:7px;color:var(--ink4)">Activations: ${[...new Set(c.genome.nodes.map(n=>n.act))].join(' · ')}</div>`;
+}
+
+function renderP2() {
+  const c = selCell && selCell.alive ? selCell : W.cells[0];
+  const p = document.getElementById('p2');
+  if (!c) { p.innerHTML = '<span class="k">—</span>'; return; }
+  const drivers = [
+    ['Food pull', c.sensors[0] * 0.8 + c.sensors[10] * 0.7, 'var(--green)'],
+    ['Threat', c.sensors[3] * 0.95 + c.sensors[11] * 0.8, 'var(--red)'],
+    ['Explore', c.curiosity * 0.9 + c.sensors[7] * 0.2, 'var(--blue)'],
+    ['Social', c.sensors[12] * 0.55 + c.sensors[8] * 0.45, 'var(--violet)'],
+  ];
+  p.innerHTML =
+    '<div style="font-size:7.5px;color:var(--ink4);letter-spacing:.1em;margin-bottom:3px">SENSORS (14)</div>' +
+    SNAMES.map((n,i)=>`<div class="bg"><span class="bl">${n.slice(0,10)}</span><div class="trk"><div class="fill" style="width:${(c.sensors[i]||0)*100}%;background:${SCOLS[i]}"></div></div><span class="bv">${(c.sensors[i]||0).toFixed(2)}</span></div>`).join('') +
+    '<div class="sep"></div><div style="font-size:7.5px;color:var(--ink4);letter-spacing:.1em;margin-bottom:3px">MOTIVE WEIGHTING</div>' +
+    drivers.map(([n,v,col])=>`<div class="bg"><span class="bl">${n}</span><div class="trk"><div class="fill" style="width:${Math.min(1,v)*100}%;background:${col}"></div></div><span class="bv">${Math.min(1,v).toFixed(2)}</span></div>`).join('') +
+    '<div class="sep"></div><div style="font-size:7.5px;color:var(--ink4);letter-spacing:.1em;margin-bottom:3px">OUTPUTS (6)</div>' +
+    ONAMES.map((n,i)=>`<div class="bg"><span class="bl">${n}</span><div class="trk"><div class="fill" style="width:${(c.outputs[i]||0)*100}%;background:${OCOLS[i]}"></div></div><span class="bv">${(c.outputs[i]||0).toFixed(2)}</span></div>`).join('');
+}
+
+function renderP3() {
+  const c = selCell && selCell.alive ? selCell : W.cells[0];
+  const p = document.getElementById('p3');
+  const nActive = c ? c.genome.conns.filter(cn=>cn.en).length : 0;
+  p.innerHTML = `
+  <div style="font-size:7.5px;color:var(--ink4);letter-spacing:.1em">${c ? '#'+c.id+' · '+c.genome.nodes.length+' nodes · '+nActive+' conns' : 'no cell'}</div>
+  <canvas id="ncvs" width="286" height="155" style="width:100%;border-radius:5px;border:1px solid var(--brd);display:block;margin-top:3px"></canvas>
+  <div style="font-size:7px;color:var(--ink4);letter-spacing:.1em;margin-top:4px">GENOME STRUCTURE</div>
+  <canvas id="gcvs" width="286" height="36" style="width:100%;border-radius:5px;border:1px solid var(--brd);display:block;margin-top:2px"></canvas>`;
+  requestAnimationFrame(() => {
+    if (c) { drawNeural(document.getElementById('ncvs'), c); drawGenome(document.getElementById('gcvs'), c); }
+  });
+}
+
+function drawNeural(cvs, c) {
+  if (!cvs) return;
+  const x = cvs.getContext('2d');
+  const W2 = cvs.width, H = cvs.height;
+  x.fillStyle = '#f7f5f2'; x.fillRect(0, 0, W2, H);
+  x.fillStyle = 'rgba(0,0,0,.04)';
+  for (let gx=0; gx<W2; gx+=14) for (let gy=0; gy<H; gy+=14) { x.beginPath();x.arc(gx,gy,.7,0,Math.PI*2);x.fill(); }
+
+  const nodes = c.genome.nodes;
+  const ins  = nodes.filter(n => n.type === 'input');
+  const hid  = nodes.filter(n => n.type === 'hidden');
+  const outs = nodes.filter(n => n.type === 'output');
+  const layers = hid.length ? [ins, hid, outs] : [ins, outs];
+  const lxs = layers.map((_,i) => 16 + (i / (layers.length-1)) * (W2-32));
+  const pos = new Map();
+  layers.forEach((layer, li) => {
+    const lx = lxs[li];
+    layer.forEach((node, ni) => {
+      pos.set(node.id, { x: lx, y: 12 + (ni / Math.max(layer.length-1, 1)) * (H-24) });
+    });
+  });
+  for (const c2 of c.genome.conns) {
+    if (!c2.en) continue;
+    const f = pos.get(c2.from), t = pos.get(c2.to);
+    if (!f || !t) continue;
+    const str = Math.min(Math.abs(c2.w) / 2.5, 0.5);
+    x.strokeStyle = c2.w > 0 ? `rgba(22,101,52,${str})` : `rgba(153,27,27,${str})`;
+    x.lineWidth = 0.8;
+    x.beginPath(); x.moveTo(f.x,f.y); x.lineTo(t.x,t.y); x.stroke();
+  }
+  const TC = {input:'#1e40af', hidden:'#6d28d9', output:'#166534'};
+  const AC = {tanh:'#5b21b6', sigmoid:'#166534', relu:'#c2410c', linear:'#475569'};
+  nodes.forEach(n => {
+    const p = pos.get(n.id); if (!p) return;
+    const col = TC[n.type] || '#888';
+    const actv = Math.max(0, Math.min(1, Math.abs(c.lastActivations?.[n.id] ?? 0)));
+    x.save(); x.shadowColor=col; x.shadowBlur=7 + actv * 8;
+    x.beginPath(); x.arc(p.x,p.y,n.type==='hidden'?5.5+actv*1.2:4.5+actv,0,Math.PI*2);
+    x.fillStyle = n.type === 'input' ? col+'bb' : (n.type === 'hidden' ? `rgba(109,40,217,${0.3 + actv * 0.7})` : `rgba(22,101,52,${0.3 + actv * 0.7})`);
+    x.fill(); x.strokeStyle=col; x.lineWidth=1.2; x.stroke(); x.restore();
+    if (n.type === 'hidden') {
+      x.font='6px JetBrains Mono'; x.textAlign='center';
+      x.fillStyle=AC[n.act]||'#888'; x.fillText(n.act[0].toUpperCase(),p.x,p.y+10);
+    }
+  });
+  x.font='7px JetBrains Mono'; x.textAlign='center';
+  [[`IN(${ins.length})`,lxs[0],'#1e40af'],
+   ...(hid.length?[[`HID(${hid.length})`,lxs[1],'#6d28d9']]:[]),
+   [`OUT(${outs.length})`,lxs[lxs.length-1],'#166534']].forEach(([l,lx,c3])=>{
+    x.fillStyle=c3+'77'; x.fillText(l,lx,H-2);
+  });
+}
+
+function drawGenome(cvs, c) {
+  if (!cvs) return;
+  const x = cvs.getContext('2d');
+  const W2 = cvs.width, H = cvs.height;
+  x.fillStyle = '#f7f5f2'; x.fillRect(0,0,W2,H);
+  const nodes = c.genome.nodes;
+  const nw = Math.max(2, (W2-4)/nodes.length - 1.5);
+  const TC = {input:'#1e40af', hidden:'#6d28d9', output:'#166534'};
+  nodes.forEach((n,i) => {
+    const nx = 2 + i*(nw+1.5);
+    const col = TC[n.type]||'#888';
+    x.fillStyle=col+'44'; x.fillRect(nx,5,nw,H-10);
+    x.fillStyle=col; x.fillRect(nx,H-5,nw,4);
+  });
+  x.font='6.5px JetBrains Mono'; x.textAlign='left';
+  [['INPUT',2,'#1e40af'],['HIDDEN',50,'#6d28d9'],['OUTPUT',102,'#166534']].forEach(([l,lx,col])=>{
+    x.fillStyle=col; x.fillText('■ '+l,lx,7);
+  });
+}
+
+function renderP4() {
+  const alive = W.cells;
+  const avgE = alive.length ? alive.reduce((s,c)=>s+c.energy,0)/alive.length : 0;
+  const avgC = alive.length ? alive.reduce((s,c)=>s+c.genome.complexity,0)/alive.length : 0;
+  const avgH = alive.length ? alive.reduce((s,c)=>s+c.genome.nodes.filter(n=>n.type==='hidden').length,0)/alive.length : 0;
+  const avgF = alive.length ? alive.reduce((s,c)=>s+(c.fitness||0),0)/alive.length : 0;
+  const top3F  = [...alive].sort((a,b)=>b.foodEaten-a.foodEaten).slice(0,4);
+  const top3O  = [...alive].sort((a,b)=>b.offspring-a.offspring).slice(0,4);
+  const recent = W.dead.slice(-5).reverse();
+
+  document.getElementById('p4').innerHTML = `
+  <div class="g2" style="margin-bottom:3px">
+    <div class="kv"><span class="k">MAX GEN</span><span class="v" style="color:var(--orange)">${W.maxGen}</span></div>
+    <div class="kv"><span class="k">ALIVE</span><span class="v" style="color:var(--green)">${alive.length}</span></div>
+    <div class="kv"><span class="k">TOTAL BORN</span><span class="v">${W.totalBorn}</span></div>
+    <div class="kv"><span class="k">TOTAL DIED</span><span class="v" style="color:var(--red)">${W.dead.length}</span></div>
+    <div class="kv"><span class="k">ENV MODE</span><span class="v" style="color:var(--blue)">${ENV_MODES[W.mode].label}</span></div>
+    <div class="kv"><span class="k">AVG ENERGY</span><span class="v" style="color:var(--orange)">${avgE.toFixed(1)}</span></div>
+    <div class="kv"><span class="k">AVG FITNESS</span><span class="v" style="color:var(--violet)">${avgF.toFixed(2)}</span></div>
+    <div class="kv"><span class="k">BEST FITNESS</span><span class="v" style="color:var(--violetL)">${(W.bestFitness||0).toFixed(2)}</span></div>
+    <div class="kv"><span class="k">ELITE ARCHIVE</span><span class="v" style="color:var(--blue)">${W.eliteArchive.length}</span></div>
+    <div class="kv"><span class="k">AVG COMPLEXITY</span><span class="v" style="color:var(--violet)">${avgC.toFixed(1)}</span></div>
+    <div class="kv"><span class="k">AVG HIDDEN N</span><span class="v" style="color:var(--violetL);font-size:8px">${avgH.toFixed(2)}</span></div>
+    <div class="kv"><span class="k">INNOV COUNT</span><span class="v" style="color:var(--ink3)">${_innov}</span></div>
+    <div class="kv"><span class="k">AUTOSAVE</span><span class="v" style="color:var(--green)">tick ${CFG.SAVE_EVERY}</span></div>
+  </div>
+  <div class="sep"></div>
+  <div style="font-size:7.5px;color:var(--ink4);letter-spacing:.1em;margin-bottom:3px">TOP FORAGERS</div>
+  <div class="clist" style="flex:none">
+  ${top3F.map(c=>`<div class="crow ${c===selCell?'sel':''}" onclick="selCell=W.cells.find(cc=>cc.id===${c.id})||null">
+    <div class="swatch" style="background:${c.colorHex};border-radius:${c.isPrimis?'2px':'50%'}"></div>
+    <span style="color:${c.colorHex};font-weight:600">#${c.id}${c.isPrimis?' ✦':''}</span>
+    <span style="color:var(--ink3)">G${c.gen}</span>
+    <span style="color:var(--green);margin-left:auto">${c.foodEaten} food</span>
+  </div>`).join('')}
+  </div>
+  <div class="sep"></div>
+  <div style="font-size:7.5px;color:var(--ink4);letter-spacing:.1em;margin-bottom:3px">MOST OFFSPRING</div>
+  <div class="clist" style="flex:none">
+  ${top3O.map(c=>`<div class="crow ${c===selCell?'sel':''}" onclick="selCell=W.cells.find(cc=>cc.id===${c.id})||null">
+    <div class="swatch" style="background:${c.colorHex};border-radius:${c.isPrimis?'2px':'50%'}"></div>
+    <span style="color:${c.colorHex};font-weight:600">#${c.id}${c.isPrimis?' ✦':''}</span>
+    <span style="color:var(--ink3)">G${c.gen}</span>
+    <span style="color:var(--orange);margin-left:auto">${c.offspring} off.</span>
+  </div>`).join('')}
+  </div>
+  <div class="sep"></div>
+  <div style="font-size:7.5px;color:var(--ink4);letter-spacing:.1em;margin-bottom:3px">ALL CELLS · mini</div>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:3px">
+  ${alive.slice(0,50).map(c=>`<div title="#${c.id} G${c.gen}" onclick="selCell=W.cells.find(cc=>cc.id===${c.id})||null" style="width:13px;height:13px;border-radius:${c.isPrimis?'3px':'50%'};background:${c.colorHex};border:${c===selCell?'2px solid var(--ink)':'1px solid rgba(0,0,0,.18)'};cursor:pointer;opacity:${0.35+0.65*(c.energy/CFG.MAX_E)};transition:opacity .1s"></div>`).join('')}
+  </div>
+  <div class="sep"></div>
+  <div style="font-size:7.5px;color:var(--ink4);letter-spacing:.1em;margin-bottom:2px">RECENT DEATHS</div>
+  ${recent.map(d=>`<div style="display:flex;justify-content:space-between;font-size:7.5px;padding:1px 2px">
+    <span style="color:var(--ink3)">#${d.id} G${d.gen}</span>
+    <span style="color:var(--red)">age ${d.age}</span>
+    <span style="color:var(--ink4)">${d.off} off.</span>
+  </div>`).join('')}
+  <div class="sep"></div>
+  <div style="font-size:7.5px;color:var(--ink4);letter-spacing:.1em;margin-bottom:2px">RECENT HISTORY</div>
+  ${W.history.slice(-4).map(h=>`<div style="display:flex;justify-content:space-between;font-size:7.5px;padding:1px 2px">
+    <span style="color:var(--ink3)">T${h.tick}</span>
+    <span style="color:var(--violet)">fit ${h.avgFitness.toFixed(2)}</span>
+    <span style="color:var(--orange)">cx ${h.avgComplexity.toFixed(1)}</span>
+    <span style="color:var(--green)">pop ${h.pop}</span>
+  </div>`).join('')}`;
+}
+
+// ════════════════════════════════════════════════════════
+// UI + CONTROLS
+// ════════════════════════════════════════════════════════
+const UI = {
+  paused:  false,
+  speed:   1,
+  togglePause() {
+    this.paused = !this.paused;
+    const b = document.getElementById('bpause');
+    b.textContent = this.paused ? '▶ RUN' : '⏸ PAUSE';
+    b.classList.toggle('on', this.paused);
+  },
+  toggleSen() { showSen = !showSen; document.getElementById('bsen').classList.toggle('on', showSen); },
+  togglePh()  { showPh  = !showPh;  document.getElementById('bph').classList.toggle('on', showPh); },
+  setSpd(v)   { this.speed = parseInt(v); document.getElementById('bhz').textContent = (this.speed*30)+' Hz'; },
+  cycleEnv() {
+    const modes = ['abundance','scarcity','hazard'];
+    W.mode = modes[(modes.indexOf(W.mode)+1)%modes.length];
+    document.getElementById('benv').textContent = 'ENV · ' + ENV_MODES[W.mode].label;
+    W.log('mode', 'manual environment set to ' + ENV_MODES[W.mode].label, '#1e3a8a');
+  },
+  reset() {
+    if (!confirm('Reset? All data lost.')) return;
+    State.clear();
+    _cid = 0; _innov = 0; _innovCache.clear(); primisID = -1;
+    W = new World();
+    selCell = W.cells.find(c => c.isPrimis) || W.cells[0] || null;
+  },
+};
+
+function updateHeader() {
+  document.getElementById('hg').textContent = W.maxGen;
+  document.getElementById('ha').textContent = W.cells.length;
+  document.getElementById('ht').textContent = W.tick.toString().padStart(6,'0');
+  document.getElementById('hd').textContent = W.dead.length;
+  document.getElementById('hf').textContent = W.food.length;
+  const be = document.getElementById('benv'); if (be) be.textContent = 'ENV · ' + ENV_MODES[W.mode].label;
+}
+
+
+function updateEvents() {
+  const s = document.getElementById('evts');
+  const ev = W.events.slice(-10).reverse();
+  s.innerHTML = ev.map((e,i) => `
+    <div class="ev" style="opacity:${Math.max(.1,1-i*.085)};background:${i===0?'rgba(0,0,0,.025)':'transparent'}">
+      <span class="et">T·${e.tick.toString().padStart(5,'0')}</span>
+      <span class="em" style="color:${e.color}">${e.msg}</span>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════
+// PERSISTENCE
+// ════════════════════════════════════════════════════════
+const State = {
+  KEY: 'protomind_v6',
+  save() {
+    try { localStorage.setItem(this.KEY, JSON.stringify(W.serialize())); }
+    catch(e) { console.warn('save error', e); }
+  },
+  load(force) {
+    try {
+      const d = localStorage.getItem(this.KEY);
+      if (d) { W = World.deserialize(JSON.parse(d)); if (force) selCell = W.cells.find(c => c.isPrimis) || W.cells[0] || null; return true; }
+    } catch(e) { console.warn('load error', e); }
+    return false;
+  },
+  clear() { localStorage.removeItem(this.KEY); }
+};
+
+// ════════════════════════════════════════════════════════
+// CLICK TO SELECT
+// ════════════════════════════════════════════════════════
+cvs.addEventListener('click', e => {
+  const rect = cvs.getBoundingClientRect();
+  const sx = CFG.WW / rect.width, sy = CFG.WH / rect.height;
+  const mx = (e.clientX - rect.left) * sx;
+  const my = (e.clientY - rect.top)  * sy;
+  let best = null, bd = Infinity;
+  for (const c of W.cells) {
+    const d = Math.hypot(c.x - mx, c.y - my);
+    if (d < bd && d < 30) { bd = d; best = c; }
+  }
+  selCell = best;
+});
+
+// ════════════════════════════════════════════════════════
+// MAIN LOOP
+// ════════════════════════════════════════════════════════
+let frame = 0;
+function loop() {
+  if (!UI.paused) for (let s = 0; s < UI.speed; s++) W.step();
+  animT++; frame++;
+
+  drawWorld();
+  updateHeader();
+  if (frame % 4 === 0) { renderP1(); renderP2(); renderP4(); }
+  if (frame % 8 === 0)   renderP3();
+  if (frame % 2 === 0)   updateEvents();
+
+  requestAnimationFrame(loop);
+}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  initCanvas();
+  if (!State.load()) W = new World();
+  selCell = W.cells.find(c => c.isPrimis) || W.cells[0] || null;
+  window.addEventListener('beforeunload', () => State.save());
+  window.addEventListener('resize', initCanvas);
+  loop();
+});
+
+</script>
+</body>
+</html>
