@@ -1,0 +1,7 @@
+# Model and licensing
+
+The model is [LiquidAI/LFM3-1.7B](https://huggingface.co/LiquidAI/LFM3-1.7B), credited to Liquid AI. The official [GGUF file page](https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF/blob/main/LFM3-1.7B-Q4_K_M.gguf) lists `LFM3-1.7B-Q4_K_M.gguf` at about 1.1 GB and publishes SHA-256 `3793e1e6e2266919d6e015287221b41100175a98eddaba92e111aed3b05c93c4`. The download script uses revision `cd0c74c`, checks free space, file size, GGUF magic, and the publisher checksum. Inspect the publisher repository before any long-term archival use.
+
+The runtime installer uses [llama.cpp](https://github.com/ggml-org/llama.cpp/releases/tag/b12088) tag `b12088` in the project-local `runtime/` directory. On macOS Apple Silicon without CMake it safely extracts the official prebuilt archive; otherwise it builds source. No runtime or model is downloaded during basic setup. Users must install the pinned runtime and a compatible model explicitly before model-based experiments.
+
+The supplied prototype includes an MIT `LICENSE` credited to Altan Ulas. This repository preserves that notice. The repository owner should confirm its application to the newly authored implementation before publishing it. The model is governed separately by the [LFM Open License v1.0](https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF/blob/main/LICENSE), including its attribution and redistribution terms. Do not include downloaded model weights in a Git publication without reviewing that license and applicable conditions. This project does not claim ownership of model weights or llama.cpp.

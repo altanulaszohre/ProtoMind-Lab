@@ -1,0 +1,17 @@
+{
+  "name": "calibrated_v1",
+  "calibration_seeds": [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112],
+  "evaluation_seeds": [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008],
+  "selection_rationale": "140 ticks and predator speed 2.6 produced encounters and both survival and mortality in the mechanistic calibration grid; no LLM outcomes were used",
+  "config": {
+    "width": 100.0, "height": 100.0, "prey_count": 8, "food_count": 18,
+    "perception": 28.0, "interaction": 2.5, "prey_speed": 2.0,
+    "predator_speed": 2.6, "acceleration": 0.35, "turn_radians": 0.6,
+    "metabolism": 0.12, "move_cost": 0.07, "food_energy": 13.0,
+    "food_replenish_interval": 9, "decision_interval": 5, "max_ticks": 140,
+    "seed": 1, "predator_enabled": true, "predator_perception": 36.0,
+    "capture_radius": 2.5, "social_strength": 1.0, "start_energy": 50.0,
+    "max_energy": 100.0, "resource_shift_tick": null,
+    "stochastic_spawn_probability": 0.0, "decision_cooldown": 2
+  }
+}

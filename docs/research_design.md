@@ -1,0 +1,11 @@
+# Research design
+
+Condition A uses a deterministic rule policy. B uses the selected inference backend with current observation only. C uses the same backend plus that prey's bounded SQLite experience. D records the same individual history but scrambles retrieved values as an information control. A real LFM3 comparison requires `--backend llama`; mock runs are software checks and are labeled as such. No outcome should be interpreted as evidence for biological or LLM superiority until replicated with real inference and statistical analysis.
+
+Each seed initializes identical positions and food for A, B, C, and D. World dimensions, initial population, predator mechanics, observation radius, resource rules, and maximum duration are held fixed. Memory is the intended B/C intervention; D controls for memory-shaped prompt material. Individual SQLite stores are created per run and expire old records. B does not retrieve or retain earlier observations. The model weights remain frozen.
+
+`experiments.py` defines every reported metric in `METRIC_DEFINITIONS` and writes those definitions to `config.json`. Survival rate uses initial prey as denominator. Survival time is censored at the final tick. Cohesion is average pairwise distance, with zero for fewer than two survivors. Fragmentation counts connected components using the configured observation radius. Escape success is the fraction of ticks where the nearest prey is farther than four interaction radii; this is a simulator proxy, not a measured fish escape response. Runtime and model latency depend on hardware and should be interpreted separately from simulated outcomes.
+
+Run multiple independent seeds and compare paired per-seed differences, not only summary means. The current CLI reports aggregate arithmetic means; it does not calculate confidence intervals or statistical significance. For real inference, log raw responses and validated actions, and inspect invalid-decision rates. Prompt contents are local simulation observations and memories; they are untrusted input to the validator.
+
+Short runs with few seeds cannot establish a memory effect or model benefit. A preregistered, adequately powered comparison is still needed.

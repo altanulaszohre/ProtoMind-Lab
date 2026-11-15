@@ -1,0 +1,9 @@
+{
+  "name": "protomind-observatory",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {"build": "tsc --noEmit && vite build", "test": "tsx --test tests/*.test.ts"},
+  "dependencies": {"pixi.js": "8.17.0", "lucide": "0.468.0"},
+  "devDependencies": {"typescript": "5.7.3", "vite": "6.4.1", "tsx": "4.20.6", "@types/node": "22.15.30"}
+}

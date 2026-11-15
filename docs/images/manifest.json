@@ -1,0 +1,29 @@
+{
+  "agent_inspector": "Same replay; inspector scrolled to expose observations and validated decisions. Condition A has no episodic memory.",
+  "analysis": "Measured bundled-replay time series through tick 140.",
+  "animation": {
+    "condition": "A",
+    "duration_seconds": 10,
+    "fps": 8,
+    "frames": 80,
+    "interpretation": "Shows recorded movement, alignment changes, pursuit and capture; it is not evidence of an LLM or memory advantage.",
+    "method": "One actual browser render per authoritative recorded tick; shared 128-color palette, resized to 840 by 550.",
+    "policy": "mechanistic",
+    "seed": 1001,
+    "source": "recordings/predator-pressure.json.gz",
+    "ticks": [
+      1,
+      80
+    ]
+  },
+  "binary_sha256": {
+    "docs/images/agent-inspector.png": "3a69a3a10fd7bfb1d9364f83bb3772b071cf034412d515ed3f7ce8c23487776f",
+    "docs/images/analysis.png": "5591de24c911cf26ddbb85b8f2f8f29e270e16b4bff4e028f193a1859f995ef3",
+    "docs/images/collective-behavior.gif": "8b115aac0761dff582fe6402731f0e4ccce74572c551ca4421eb7cc6b159b948",
+    "docs/images/experiment-setup.png": "49df151cf5279f116d5d2fcafb4db91df55234900b8f128c8e32b939325c8c20",
+    "docs/images/overview.png": "b02594442afb0a2f925ec748bbea619d45f276a7917204799583b39616ed34c5"
+  },
+  "experiment_setup": "Live experiment controls after a completed condition A run; editable settings are shown.",
+  "overview": "Bundled replay, condition A, seed 1001, tick 140.",
+  "provenance": "Screenshots and animation captured from the running application, using the bundled verified condition A replay. Images were cropped and format-optimized; no scene content was synthesized."
+}

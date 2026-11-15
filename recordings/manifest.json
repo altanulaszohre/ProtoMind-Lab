@@ -1,0 +1,11 @@
+{
+  "file": "predator-pressure.json.gz",
+  "sha256": "33fc5e8a068800c96712c9e4fb19545f54a7391e7b2897cbaa72e09ccad12464",
+  "condition": "A",
+  "mechanism": "mechanistic; no LLM inference",
+  "seed": 1001,
+  "ticks": 140,
+  "bytes": 114818,
+  "verified": true,
+  "generator": "scripts/generate_replay.py"
+}

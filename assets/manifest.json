@@ -1,0 +1,9 @@
+{
+  "license": "MIT",
+  "provenance": "Original ProtoMind Lab assets; see ATTRIBUTION.md",
+  "binary_sha256": {
+    "assets/synthetic-atlas.png": "7117770ca924ab11666b65c43081688b04d3f0436d3d15ad85b0fa26b4e4ac56",
+    "assets/ProtoMind.icns": "fa5ad957d3b3e9439e9d1ae773d566b092c6fc196056e5d17de93215a8493649",
+    "assets/brand/app-icon-512.png": "1ced3dd840f9796876e7811da9275c4d37785046844cd3d01385459bd8464ec5"
+  }
+}
