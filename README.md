@@ -1,119 +1,163 @@
-<p align="center"><img src="assets/brand/wordmark-light.svg" width="420" alt="ProtoMind Lab — collective intelligence observatory"></p>
+<p align="center">
+  <img src="assets/brand/wordmark-light.svg" width="390" alt="ProtoMind Lab" />
+</p>
 
-# ProtoMind Lab
+<h1 align="center">ProtoMind Lab</h1>
+<p align="center">
+  <strong>A local research environment for collective intelligence and agent decision-making.</strong>
+</p>
+<p align="center">
+  Explore how limited perception, language-model-driven decisions, and individual memory shape behavior in a shared, resource-constrained environment.
+</p>
 
-A local research environment for studying how small language models, individual episodic memory, and partial observations influence collective agent behavior under resource constraints and predation pressure.
+<p align="center">
+  <img src="docs/images/overview.png" alt="ProtoMind Lab observatory — interactive simulation, experiment controls, agent inspection, and recorded measurements" width="100%" />
+</p>
 
-ProtoMind Lab separates behavioral decisions from physical dynamics. Independent agents observe a bounded neighborhood, optionally retrieve their own memories, and request a structured objective from a shared local language model. A deterministic simulation engine applies that objective through constrained movement and ecological rules. The interactive observatory exposes the resulting trajectories, observations, decisions, events, and measurements for inspection and reproducible comparison.
+ProtoMind Lab is an open-source experimental platform for studying **collective behavior under environmental pressure**. It combines a reproducible predator–prey simulation with mechanistic and local language-model policies, then makes the resulting movement, decisions, and measurements accessible through an interactive observatory.
 
-![The working ProtoMind Lab observatory showing a verified mechanistic replay, experiment controls, selected-agent state, and measured time series](docs/images/overview.png)
+Rather than treating the language model as a physics engine, ProtoMind Lab uses it to select **bounded behavioral objectives**. Movement, perception, energy consumption, resources, and predator interactions remain under the control of the simulation engine. This separation makes the behavior inspectable and supports comparisons across decision policies.
 
-<img src="docs/images/agent-inspector.png" width="420" alt="Recorded observations, memory status, and validated decisions for the selected agent">
+## Explore the observatory
 
-![Measured survival, alignment, fragmentation, and episode time series](docs/images/analysis.png)
+The interface connects the simulation to the evidence behind each experiment. Inspect an individual agent's local observations and recorded decisions, adjust ecological conditions, or compare measurements from previously executed runs.
 
-![Actual recorded agent trajectories and predator interactions in the bundled mechanistic experiment](docs/images/collective-behavior.gif)
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="docs/images/agent-inspector.png" alt="Agent inspector showing local observations, behavioral state, and recorded decisions" width="100%" />
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/images/experiment-setup.png" alt="Experiment controls for agent populations, environment settings, and policy conditions" width="100%" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Agent inspection — examine observations and decisions.</sub></td>
+    <td align="center"><sub>Experiment configuration — create new scenarios with validated parameters.</sub></td>
+  </tr>
+</table>
 
-*Recorded engine frames from the bundled Predator Pressure experiment: condition A, mechanistic policy, seed 1001, eight initial prey agents, and one predator. No language-model inference is used in this animation. The GIF shows ticks 1–80 at eight recorded ticks per second (10 seconds). It uses actual browser-rendered frames and does not change simulation dynamics.*
+**Replay mode** opens with a bundled, verified recording and requires no language model. Explore trajectories, select agents, inspect events, and navigate the timeline at your own pace.
 
-## Research scope and architecture
+**Live mode** lets you run a new experiment with adjustable population, resource, perception, predator, and decision settings. A calibrated reference configuration remains available for controlled comparisons.
 
-The research question is whether model-mediated objectives, and then individual memory, alter resource use, survival, or collective motion relative to a mechanistic baseline. Agents share model weights but have separate observations and memory namespaces. The project does not train model weights or establish that emergent intelligence, learning, or biological realism has been achieved.
+## Research design
 
-The decision loop is:
+The central question is whether **language-model-selected objectives and agent-specific episodic memory** change survival, resource use, or collective motion relative to a mechanistic baseline.
 
-**Local observation → optional individual memory → behavioral policy → structured-decision validation → mechanistic steering → world update → recorded measurements.**
+The system follows a clear separation of responsibilities:
 
-The Python engine owns position, velocity, acceleration limits, turning constraints, energy, resources, and capture events. The TypeScript/PixiJS interface renders those states at a separate display rate. Synthetic blue agents, coral pressure agents, and green resource clusters are visual representations; their shading introduces no simulated depth.
+```text
+Local observation
+       ↓
+Individual memory (optional)
+       ↓
+Behavioral policy (mechanistic or local LLM)
+       ↓
+Validated behavioral objective
+       ↓
+Mechanistic steering and ecological dynamics
+       ↓
+Recorded states, events, and measurements
+```
 
-One loopback-only llama.cpp process serves model requests sequentially. A project-level lock prevents simultaneous model loads by cooperating project processes. The default integration is Liquid AI's LFM3-1.7B GGUF. Replay and mechanistic experiments require no model or inference runtime.
+The **Python simulation engine** enforces perception boundaries, movement constraints, energy dynamics, resource interactions, and predation. The **TypeScript/PixiJS observatory** renders the recorded or live simulation state independently of the model's inference rate. Local LLM requests are served through **llama.cpp**; agents share model weights while retaining separate observations and memory records.
 
-## Experimental conditions
+### Experimental conditions
 
-| Condition | Decision mechanism | Memory supplied to the policy |
-| --- | --- | --- |
-| A | Deterministic mechanistic baseline | None |
-| B | Local language model | Current observation only |
-| C | The same local language model | Agent-specific episodic memory |
-| D | The same local language model | The existing scrambled-content memory control |
+| Condition | Policy | Memory available to the policy |
+| :--- | :--- | :--- |
+| **A · Mechanistic** | Deterministic, model-free baseline | None |
+| **B · LLM** | Local language model | Current observation only |
+| **C · LLM + Memory** | The same local language model | Agent-specific episodic memory |
+| **D · Memory Control** | The same local language model | Scrubbed-content memory control |
 
-Condition D preserves record structure while scrubbing content; it is not a permutation of authentic memories between agents. The interface retains the established “shuffled-memory control” label. See the [experimental protocol](docs/experimental_protocol.md) and [scientific model](docs/scientific_model.md) for exact definitions.
+Condition D retains the structure of memory records while removing their meaningful content; it does **not** exchange authentic memories between agents. Exact definitions and controls are documented in the [experimental protocol](docs/experimental_protocol.md) and [scientific model](docs/scientific_model.md).
 
-Decisions choose an objective, duration, and optional visible target. Invalid or unavailable model responses use the engine's explicitly recorded safe fallback; they are counted as invalid decisions and are not presented as successful inference. Model-load or compatibility failure prevents a model-based episode from starting. The CLI's explicit mock backend is a software test double and is never evidence about LFM3.
+The observatory records survival, resource collection, group polarization, fragmentation, predator encounters, and model-specific inference measurements. Descriptive differences are not presented as evidence of a treatment effect without suitable replication and analysis.
 
-## Interactive observatory
+## Get started
 
-The application starts in a bundled, verified replay. Transport controls support play, pause, speed changes, single-tick steps, seeking, and event navigation. Select an agent in the arena or inspector to examine actual state and recorded decisions. Optional overlays show recorded trails, sensing radii, predator sensing fields, and neighbor links.
+**Requirements:** Python 3.10+ and macOS or another supported Unix-like environment. macOS is the primary desktop target. Native Windows support is not currently provided.
 
-Live mode exposes population, seed, episode length, resources, regeneration, perception, pursuit, decision scheduling, and memory bounds. The calibrated reference preset is immutable. The engine supports 1–100 prey and 0–1 predator; visual examples never add unrecorded organisms. Advanced parameters remain constrained by backend validation.
+From the project directory, run:
 
-![Live experiment setup with editable population, ecological parameters, and decision conditions](docs/images/experiment-setup.png)
-
-Analysis displays observed measurements and descriptive comparisons between local recordings. Reports save JSON and CSV under the project. Single episodes and unmatched configurations do not establish treatment effects. In the model-free inspector screenshot, the memory section correctly states that condition A has no episodic memory; no synthetic memory entries are shown.
-
-## Installation and quick start
-
-Requires **Python 3.10 or newer**. macOS is the primary desktop target; Unix-like systems can use the browser interface. Native Windows operation is not currently supported. The included production web build avoids a mandatory Node.js installation for normal use.
-
-From the downloaded project directory:
-
-```sh
+```bash
 ./scripts/setup.sh
 ./scripts/observatory.sh --open
 ```
 
-Open the printed loopback URL if the browser does not open automatically. The default address is `http://127.0.0.1:8765`; use `--port 8766` if that port is occupied. Basic setup creates a project-local virtual environment and does not download models or Python runtime packages. Once Python and the project are available, replay and condition A work without an internet connection.
+The browser interface opens locally, normally at `http://127.0.0.1:8765`. If the port is occupied, use `./scripts/observatory.sh --port 8766 --open`.
 
-On macOS, double-click **Launch ProtoMind Lab.command** for browser startup. To build the native WebKit launcher, install Apple's Command Line Tools and run:
+**No model download is required** to explore the bundled recording or run mechanistic experiments. Basic setup creates a project-local Python environment; the included production web build does not require Node.js for ordinary use.
 
-```sh
+On macOS, you can also double-click **`Launch ProtoMind Lab.command`**. To build the local native launcher:
+
+```bash
 ./scripts/build_macos.sh
 ```
 
-Then open **ProtoMind Lab.app** inside the project directory. Keep it beside `scripts/`, `web/`, and `assets/`; move the whole project when relocating it. The launcher owns its Python process and requests shutdown when its window closes. It reuses the project's model directory. The build is ad-hoc signed, not notarized; Gatekeeper behavior on a newly downloaded machine is not guaranteed. See [installation and desktop packaging](docs/installation.md).
+Open **`ProtoMind Lab.app`** from the project directory after building it. The launcher is ad-hoc signed rather than notarized; first-launch behavior may depend on macOS security settings. Keep the app alongside its project files. See the [installation guide](docs/installation.md) for details.
 
-Stop browser mode with the application's **Shut down** command or Ctrl-C in its terminal. Closing a browser tab alone does not stop an independently launched server.
+## Run experiments with a local language model
 
-## Models and experiments
+ProtoMind Lab supports an optional local model backend. The reference integration uses **[Liquid AI LFM3-1.7B](https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF)** in GGUF format, served through llama.cpp.
 
-Model installation is an explicit, optional step:
+To install the project-local runtime and download the reference model explicitly:
 
-```sh
+```bash
 ./scripts/setup.sh --runtime
 ./scripts/download_model.sh
 ```
 
-The download script retrieves the pinned official LFM3-1.7B Q4_K_M file, checks its publisher SHA-256, and reuses an existing valid file. The download is approximately 1.1 GB. No credentials or external inference API are required. Model weights are not distributed here.
+The download script verifies the pinned Q4_K_M model file against its publisher checksum and reuses a valid existing copy. The model download is approximately 1.1 GB. **Model weights are not included in this repository.**
 
-The **Models** panel lists project-local GGUF files, metadata, quantization filenames, context settings, estimated memory, and available disk space. Import copies a selected file into `models/` and deduplicates identical content. Embedded chat templates, model loading, and observation-constrained structured responses are tested; support is limited to models compatible with the installed runtime and decision interface. A different GGUF architecture is not automatically compatible.
+The **Models** view can import other local GGUF files and inspect their configuration, but compatibility depends on the installed runtime, chat template, and validated structured-decision interface. The application does not assume that every GGUF model will work. Failed model loading does not silently switch an LLM experiment to mock inference.
 
-To conduct an interactive experiment, choose **Live Mode**, a scenario and condition, edit parameters, then start. Mechanistic condition A remains available if no model is installed. The CLI supports paired-seed studies and parameter sweeps; see the [usage guide](docs/usage.md).
+Choose **Live Mode**, select a scenario and experimental condition, then adjust the available parameters to start a new run. Mechanistic experiments remain available without any language model. Additional experiment workflows are covered in the [usage guide](docs/usage.md).
 
-## Reproducibility and verification
+## Reproducibility
 
-The bundled recording contains 141 frames, including the initial state, and is approximately 112 KiB compressed. It is condition A, seed 1001. `recordings/manifest.json` records its checksum and provenance. The test suite reapplies its decisions and compares engine positions, events, and metrics.
+The included example is a **mechanistic Predator Pressure recording** (condition A, seed `1001`) with eight initial prey agents and one predator. It contains 141 frames, including the initial state. The recording's checksum and provenance are documented in `recordings/manifest.json`.
 
-```sh
+Recorded and validated agent actions allow the simulation engine to replay trajectories and events independently of future language-model outputs. A random seed alone does not guarantee identical text-model decisions.
+
+Run the available checks with:
+
+```bash
 ./scripts/run_tests.sh
 PROTOMIND_HTTP_TEST=1 ./scripts/run_tests.sh
-# Optional, only after installing the real model and runtime:
+
+# Optional: requires the installed local model and runtime
 PROTOMIND_REAL_TEST=1 ./scripts/run_tests.sh
 ```
 
-For frontend development, use a supported Node.js version and the pinned pnpm lockfile; follow the [development guide](docs/development_guide.md). A seed alone does not guarantee identical future model output. Recorded validated action sequences provide engine replay independently of the model. Inference latency and rendering performance are environment-dependent.
-
-The test commands above separate model-free checks from optional real-model checks. A replay or a short pilot is not evidence of a memory advantage.
+The scientific and engineering documentation provides further detail on the [research design](docs/research_design.md), [model implementation](docs/scientific_model.md), and [limitations](docs/limitations.md).
 
 ## Scientific foundations and limitations
 
-The movement system draws on Reynolds' [distributed flocking model](https://doi.org/10.1145/37401.37406) and collective-motion research such as Couzin et al.'s [effective leadership study](https://pubmed.ncbi.nlm.nih.gov/15690039/). These references motivate model structure; they do not validate this implementation against empirical trajectories.
+ProtoMind Lab draws on foundational work in distributed flocking and collective decision-making, including [Reynolds (1987)](https://doi.org/10.1145/37401.37406) and [Couzin et al. (2005)](https://pubmed.ncbi.nlm.nih.gov/15690039/). These studies inform the modeled mechanisms; they do not constitute empirical validation of this implementation.
 
-The environment uses simplified steering, clamped boundaries, point resources, and finite sensing. The predator has no satiation dynamics and may capture at most one prey per tick. Model objectives are language-mediated policies, not demonstrated cognition. Memory is external episodic storage, not weight learning. Small samples, model selection, prompt construction, fallback frequency, and ecological parameters can all affect interpretation. See [limitations](docs/limitations.md) and the [research design](docs/research_design.md).
+The environment uses simplified motion and ecological rules. Its synthetic entities are abstract visual representations, not cell or animal models. LLM-generated objectives are **not evidence of cognition**, and external episodic memory is **not model-weight learning**. Observed group motion does not by itself establish emergent intelligence or an advantage over mechanistic agents. Experimental conclusions depend on adequate replication, appropriate controls, and the limits described in the [research documentation](docs/limitations.md).
 
-## Privacy, storage, and licensing
+## Local by design
 
-There are no accounts, subscriptions, telemetry, cloud inference, or remote runtime assets. Application-managed models, caches, databases, recordings, logs, and build outputs stay under the project. Operating-system swap, browser behavior, and toolchain metadata are outside that guarantee.
+ProtoMind Lab requires **no account, cloud inference service, subscription, or telemetry**. Models, generated experiments, caches, logs, and application-managed data remain within the project directory. Operating-system and browser-managed behavior is outside this guarantee.
 
-This source distribution excludes model weights, inference binaries, virtual environments, `node_modules`, private experiment data, logs, and Git history. Run `./scripts/prepublish_check.sh --source-only` before sharing a source archive; use the normal audit after initializing a repository. The explicit [publication manifest](publication-manifest.json) inventories distributable files. See [privacy and publication controls](docs/privacy_and_storage.md).
+The source distribution excludes model weights, inference binaries, virtual environments, local databases, and private experiment records. Before publication, run:
 
-The existing [MIT license](LICENSE) and author notice are preserved. The original project documentation asks the owner to confirm that this license covers the newly authored implementation; this preparation does not resolve ownership or grant rights on someone else's behalf. Model weights retain their separate [LFM Open License v1.0](https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF/blob/main/LICENSE). Original visual-asset provenance and bundled third-party software notices are in [asset attribution](assets/ATTRIBUTION.md) and [third-party notices](web/THIRD_PARTY_NOTICES.txt).
+```bash
+./scripts/prepublish_check.sh --source-only
+```
+
+The [publication manifest](publication-manifest.json) and [privacy documentation](docs/privacy_and_storage.md) describe the distribution boundary and local-storage approach.
+
+## Licensing and attribution
+
+Project source code is distributed with the existing [MIT license](LICENSE), subject to the repository owner's confirmation that it covers all newly authored components. LFM3 model weights are governed separately by the [LFM Open License v1.0](https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF/blob/main/LICENSE). Visual-asset provenance and other software notices are recorded in [asset attribution](assets/ATTRIBUTION.md) and [third-party notices](web/THIRD_PARTY_NOTICES.txt).
+
+---
+
+<p align="center">
+  <sub>Developed by <a href="https://github.com/altanulaszohre">Altan Ulaş Zöhre</a> · ProtoMind Lab</sub>
+</p>
