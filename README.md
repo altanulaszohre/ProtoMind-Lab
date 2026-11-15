@@ -35,7 +35,7 @@ ProtoMind Lab has been evaluated through mechanistic calibration, controlled sce
 
 The LFM3 policies produced different behavioral-objective sequences, but **neither a model advantage nor a benefit from episodic memory was established**. The two-seed pilot is a functional and exploratory check, not a sufficiently replicated outcome study. A separate six-seed social-interaction ablation was also inconclusive (paired survival difference: −0.104; bootstrap 95% interval: −0.271 to 0.042).
 
-The full 140-tick, eight-seed real-model comparison remains to be run. See the [experimental validation record](docs/experimental_validation_2026-11-14.md) and [calibration report](docs/calibration_report.md) for methods, configurations, and complete measurements.
+The full 140-tick, eight-seed real-model comparison remains to be run. 
 
 ## Research design
 
