@@ -18,28 +18,24 @@ ProtoMind Lab is an open-source experimental platform for studying **collective 
 
 Rather than treating the language model as a physics engine, ProtoMind Lab uses it to select **bounded behavioral objectives**. Movement, perception, energy consumption, resources, and predator interactions remain under the control of the simulation engine. This separation makes the behavior inspectable and supports comparisons across decision policies.
 
-## Explore the observatory
+## Experimental results
 
-The interface connects the simulation to the evidence behind each experiment. Inspect an individual agent's local observations and recorded decisions, adjust ecological conditions, or compare measurements from previously executed runs.
+ProtoMind Lab has been evaluated through mechanistic calibration, controlled scenario checks, and bounded **real LFM3-1.7B inference** pilots. The figures below are recorded simulator outcomes—not claims of biological validity or emergent intelligence.
 
-<table>
-  <tr>
-    <td width="50%" align="center">
-      <img src="docs/images/agent-inspector.png" alt="Agent inspector showing local observations, behavioral state, and recorded decisions" width="100%" />
-    </td>
-    <td width="50%" align="center">
-      <img src="docs/images/experiment-setup.png" alt="Experiment controls for agent populations, environment settings, and policy conditions" width="100%" />
-    </td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Agent inspection — examine observations and decisions.</sub></td>
-    <td align="center"><sub>Experiment configuration — create new scenarios with validated parameters.</sub></td>
-  </tr>
-</table>
+**Environment calibration.** In eight held-out, 140-tick mechanistic runs, mean prey survival was **50.0%** (seed-bootstrap 95% interval: **42.2–59.4%**), with **13.25 predator encounters** and **4 captures** per run on average. Captures began after tick 10, explaining why the initial short pilots could not meaningfully distinguish survival outcomes.
 
-**Replay mode** opens with a bundled, verified recording and requires no language model. Explore trajectories, select agents, inspect events, and navigate the timeline at your own pace.
+**Real-model pilot.** A paired, two-seed, 20-tick experiment compared the mechanistic baseline with three local LFM3 conditions. All **298 real model decisions** were valid, and all eight recorded condition/seed runs reproduced matching events during replay.
 
-**Live mode** lets you run a new experiment with adjustable population, resource, perception, predator, and decision settings. A calibrated reference configuration remains available for controlled comparisons.
+| Recorded metric | A · Mechanistic | B · LFM3 | C · LFM3 + Memory | D · Memory Control |
+| :--- | ---: | ---: | ---: | ---: |
+| Mean prey survival | 87.5% | 87.5% | 87.5% | 87.5% |
+| Mean food collected | 5.0 | 6.0 | 5.5 | 4.0 |
+| Mean group alignment | 0.529 | 0.536 | 0.524 | 0.508 |
+| Real LFM3 calls | — | 98 | 98 | 102 |
+
+The LFM3 policies produced different behavioral-objective sequences, but **neither a model advantage nor a benefit from episodic memory was established**. The two-seed pilot is a functional and exploratory check, not a sufficiently replicated outcome study. A separate six-seed social-interaction ablation was also inconclusive (paired survival difference: −0.104; bootstrap 95% interval: −0.271 to 0.042).
+
+The full 140-tick, eight-seed real-model comparison remains to be run. See the [experimental validation record](docs/experimental_validation_2026-11-14.md) and [calibration report](docs/calibration_report.md) for methods, configurations, and complete measurements.
 
 ## Research design
 
@@ -75,6 +71,17 @@ The **Python simulation engine** enforces perception boundaries, movement constr
 Condition D retains the structure of memory records while removing their meaningful content; it does **not** exchange authentic memories between agents. Exact definitions and controls are documented in the [experimental protocol](docs/experimental_protocol.md) and [scientific model](docs/scientific_model.md).
 
 The observatory records survival, resource collection, group polarization, fragmentation, predator encounters, and model-specific inference measurements. Descriptive differences are not presented as evidence of a treatment effect without suitable replication and analysis.
+
+<table>
+  <tr>
+    <td width="50%" align="center"><img src="docs/images/agent-inspector.png" width="100%" alt="Agent inspector displaying recorded local observations and decisions" /></td>
+    <td width="50%" align="center"><img src="docs/images/experiment-setup.png" width="100%" alt="Experiment setup with editable, validated ecological parameters" /></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Agent-level observations and decisions</sub></td>
+    <td align="center"><sub>Configurable experimental conditions</sub></td>
+  </tr>
+</table>
 
 ## Get started
 
